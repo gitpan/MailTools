@@ -24,26 +24,28 @@ foreach $ln (@line) {
  }
  else {
   print "not ok ",$i,"\n";
-#  warn "\n" . $test . "\n" . $eformat . "\n" . $ename. "\n" . $format . "\n" . $name . "\n\n";
+  print
+  print "# name '$name' != '$ename'\n" unless $ename eq $name;
+  print "# format '$format' != '$eformat'\n" unless $eformat eq $format;
  }
 
  $i++;
 }
 
 __DATA__
-"Joe & J. Harvey" <ddd @Org>, JJV @ BBN	"Joe & J. Harvey" <ddd@Org>	Joe
-"Joe & J. Harvey" <ddd @Org>	"Joe & J. Harvey" <ddd@Org>	Joe
+"Joe & J. Harvey" <ddd @Org>, JJV @ BBN	"Joe & J. Harvey" <ddd@Org>	Joe & J. Harvey
+"Joe & J. Harvey" <ddd @Org>	"Joe & J. Harvey" <ddd@Org>	Joe & J. Harvey
 JJV @ BBN	JJV@BBN	
-"spickett@tiac.net" <Sean.Pickett@zork.tiac.net>	"spickett@tiac.net" <Sean.Pickett@zork.tiac.net>	Spickett
-rls@intgp8.ih.att.com (-Schieve,R.L.) 	rls@intgp8.ih.att.com (-Schieve,R.L.)	R L Schieve
+"spickett@tiac.net" <Sean.Pickett@zork.tiac.net>	"spickett@tiac.net" <Sean.Pickett@zork.tiac.net>	Spickett@Tiac.Net
+rls@intgp8.ih.att.com (-Schieve,R.L.) 	rls@intgp8.ih.att.com (-Schieve,R.L.)	R.L. -Schieve
 bodg fred@tiuk.ti.com	bodg	
 m-sterni@mars.dsv.su.se 	m-sterni@mars.dsv.su.se	
 jrh%cup.portal.com@portal.unix.portal.com 	jrh%cup.portal.com@portal.unix.portal.com	Cup Portal Com
-astrachan@austlcm.sps.mot.com ('paul astrachan/xvt3') 	astrachan@austlcm.sps.mot.com ('paul astrachan/xvt3')	Paul Astrachan
-TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD) 	TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD)	James R Twine - The Nerd
+astrachan@austlcm.sps.mot.com ('paul astrachan/xvt3') 	astrachan@austlcm.sps.mot.com ('paul astrachan/xvt3')	Paul Astrachan/Xvt3
+TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD) 	TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD)	James R. Twine - The Nerd
 David Apfelbaum <da0g+@andrew.cmu.edu>	David Apfelbaum <da0g+@andrew.cmu.edu>	David Apfelbaum
-"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU> 	"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU>	James R Twine - The Nerd
-bilsby@signal.dra (Fred C. M. Bilsby)	bilsby@signal.dra (Fred C. M. Bilsby)	Fred C M Bilsby
+"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU> 	"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU>	James R. Twine - The Nerd
+bilsby@signal.dra (Fred C. M. Bilsby)	bilsby@signal.dra (Fred C. M. Bilsby)	Fred C. M. Bilsby
 /G=Owen/S=Smith/O=SJ-Research/ADMD=INTERSPAN/C=GB/@mhs-relay.ac.uk	/G=Owen/S=Smith/O=SJ-Research/ADMD=INTERSPAN/C=GB/@mhs-relay.ac.uk	Owen Smith
 apardon@rc1.vub.ac.be (Antoon Pardon)	apardon@rc1.vub.ac.be (Antoon Pardon)	Antoon Pardon
 "Stephen Burke, Liverpool" <BURKE@vxdsya.desy.de>	"Stephen Burke, Liverpool" <BURKE@vxdsya.desy.de>	Stephen Burke
@@ -65,11 +67,11 @@ a909062@node_cb83.node_cb83 (Colin Maytum         (0013 bro5))	a909062@node_cb83
 fred@john (Level iii support)	fred@john (Level iii support)	Level III Support
 Derek.Roskell%dero@msg.ti.com	Derek.Roskell%dero@msg.ti.com	Derek Roskell
 ":sysmail"@ Some-Group. Some-Org, Muhammed.(I am the greatest) Ali @(the)Vegas.WBA	":sysmail"@Some-Group.Some-Org	
-david d `zoo' zuhn <zoo@aggregate.com> 	david d `zoo' zuhn <zoo@aggregate.com>	David D
-"Christopher S. Arthur" <csa@halcyon.com> 	"Christopher S. Arthur" <csa@halcyon.com>	Christopher S Arthur
+david d `zoo' zuhn <zoo@aggregate.com> 	david d `zoo' zuhn <zoo@aggregate.com>	David D `Zoo' Zuhn
+"Christopher S. Arthur" <csa@halcyon.com> 	"Christopher S. Arthur" <csa@halcyon.com>	Christopher S. Arthur
 Jeffrey A Law <law@snake.cs.utah.edu> 	Jeffrey A Law <law@snake.cs.utah.edu>	Jeffrey A Law
-lidl@uunet.uu.net (Kurt J. Lidl) 	lidl@uunet.uu.net (Kurt J. Lidl)	Kurt J Lidl
+lidl@uunet.uu.net (Kurt J. Lidl) 	lidl@uunet.uu.net (Kurt J. Lidl)	Kurt J. Lidl
 Kresten_Thorup@NeXT.COM (Kresten Krab Thorup) 	Kresten_Thorup@NeXT.COM (Kresten Krab Thorup)	Kresten Krab Thorup
-hjl@nynexst.com (H.J. Lu) 	hjl@nynexst.com (H.J. Lu)	H J Lu
-berg@POOL.Informatik.RWTH-Aachen.DE (Stephen R. van den Berg) 	berg@POOL.Informatik.RWTH-Aachen.DE (Stephen R. van den Berg)	Stephen R Van Den Berg
-@oleane.net:hugues@afp.com a!b@c.d foo!bar!foobar!root	@oleane.net:hugues@afp.com	Oleane Net
+hjl@nynexst.com (H.J. Lu) 	hjl@nynexst.com (H.J. Lu)	H.J. Lu
+berg@POOL.Informatik.RWTH-Aachen.DE (Stephen R. van den Berg) 	berg@POOL.Informatik.RWTH-Aachen.DE (Stephen R. van den Berg)	Stephen R. Van Den Berg
+@oleane.net:hugues@afp.com a!b@c.d foo!bar!foobar!root	@oleane.net:hugues@afp.com	Oleane Net:Hugues

@@ -1,3 +1,117 @@
+Change 190 on 1998/09/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Update Makefile.PL for release 1.12
+
+Change 189 on 1998/09/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Internet
+	- Added options to smtpsend
+	
+	Mail::Send
+	- Updated docs for 'smtp'
+
+Change 188 on 1998/09/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- Fix _fold_line for lines which contain quoted strings
+
+Change 172 on 1998/07/10 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- avoid warnings if undef is passed to parse()
+
+Change 169 on 1998/07/04 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- tweak to format to ensure comment is delimeted by ()
+	- typo in docs
+
+Change 168 on 1998/07/04 by <gbarr@pobox.com> (Graham Barr)
+
+	- Documentation update to Mail::Internet
+
+Change 166 on 1998/07/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Cap
+	- Fixed mailcap search so it works on MacOS
+
+Change 165 on 1998/07/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Change to use Mail::Util::mailaddress
+	
+	Mail::Util
+	- updated mailaddess to be aware of MacOS
+
+Change 164 on 1998/06/30 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- fix read(0 and extract() not to require non-whitespace characters
+	  on continuation lines, a single leading whitespace char is all
+	  that is needed.
+
+Change 163 on 1998/06/30 by <gbarr@pobox.com> (Graham Barr)
+
+	- Applied patch from Roderick Schertler to
+	
+	 - Two places in Mail::Header are changed so they don't use $'.
+	
+	 - A Mail::Header::as_string method is added.
+	
+	 - Mail::Internet::as_string and as_mbox_string methods are added.
+	   The mbox variant does encoding appropriate for appending a message
+	   to a Unix mbox file.
+	
+	 - Tests for the three new methods are added.
+
+Change 162 on 1998/06/30 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Util
+	- tweak to what maildomain looks for in the sendmail config file
+
+Sun Jun 28 1998 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- Split out real handlers into thier own .pm files
+	- Added Mail::Mailer::smtp, this is the default for MacOS
+
+Wed Jun 17 1998 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Applied patch from Slaven Rezic <eserte@cs.tu-berlin.de> to support
+	  FreeBSD properly
+
+
+	Mail::Address
+	- Applied patch from Chuck O'Donnell to improve name extraction
+	
+	t/extract.t
+	- change for new extraction
+
+Sat Apr  4 1998 <gbarr@pobox.com> (Graham Barr)
+
+	bin/*.PL
+	- change "#!$Config{'scriptdir'}/perl -w\n" ot
+	  $Config{'startperl'}," -w\n"
+
+Thu Mar 19 1998 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Field
+	- modified so it works with perl < 5.004
+	
+	Makefile.PL
+	- removed code to prevent installation of Mail::Field
+
+Wed Feb 18 1998 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- Added \Q and \E to some regexp's
+
+Tue Feb 17 1998 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Added patch from Jeff Slovin to pass correct args to mailx on DG/UX
+
 *** Release 1.11
 
 Fri Jan  2 1998 <gbarr@pobox.com> (Graham Barr)

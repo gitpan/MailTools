@@ -16,9 +16,31 @@ use Mail::Header;
 use vars qw($VERSION);
 
 BEGIN {
-    $VERSION = "1.30";
-    *AUTOLOAD = \&AutoLoader::AUTOLOAD
+    $VERSION = "1.32";
+    *AUTOLOAD = \&AutoLoader::AUTOLOAD;
+
+    unless(defined &UNIVERSAL::isa) {
+	*UNIVERSAL::isa = sub {
+	    my($obj,$type) = @_;
+	    my $pkg = ref($obj) || $obj;
+	    my @pkg = ($pkg);
+	    my %done;
+	    while(@pkg) {
+        	$pkg = shift @pkg;
+		return 1 if $pkg eq $type;
+        	next if exists $done{$pkg};
+        	$done{$pkg} = 1;
+
+		no strict 'refs';
+
+        	unshift @pkg,@{$pkg . "::ISA"}
+        	    if(@{$pkg . "::ISA"});
+	    }
+	    undef;
+	}
+    }
 }
+
 
 sub new
 {
@@ -231,6 +253,23 @@ sub print
  $me->print_header($fd)
     and print $fd "\n"
     and $me->print_body($fd);
+}
+
+sub as_string
+{
+ my $me = shift;
+
+ $me->head->as_string . "\n" . join '', @{ $me->body };
+}
+
+sub as_mbox_string
+{
+ my $me = shift->dup;
+ my $escaped = shift;
+
+ $me->head->delete('Content-Length');
+ $me->escape_from unless $escaped;
+ $me->as_string . "\n";
 }
 
 sub remove_sig
@@ -480,6 +519,37 @@ sub sign
   }
 }
 
+sub _prephdr {
+    my $hdr = shift;
+
+    $hdr->delete('From '); # Just in case :-)
+
+    # An original message should not have any Received lines
+
+    $hdr->delete('Received');
+
+    $hdr->replace('X-Mailer', "Perl5 Mail::Internet v" . $Mail::Internet::VERSION);
+
+    my $name = eval { (getpwuid($>))[6] } || $ENV{NAME} || "";
+
+    while($name =~ s/\([^\(\)]*\)//) { 1; }
+
+    if($name =~ /[^\w\s]/) {
+	$name =~ s/"/\"/g;
+	$name = '"' . $name . '"';
+    }
+
+    my $from = sprintf "%s <%s>", $name, mailaddress();
+    $from =~ s/\s{2,}/ /g;
+
+    my $tag;
+
+    foreach $tag (qw(From Sender)) {
+	$hdr->add($tag,$from)
+	    unless($hdr->get($tag));
+    }
+}
+
 sub smtpsend;
 
 use Carp;
@@ -487,116 +557,120 @@ use Mail::Util qw(mailaddress);
 use Mail::Address;
 use Net::Domain qw(hostname);
 use Net::SMTP;
-
+use strict;
 
  sub smtpsend 
 {
- my $src  = shift;
- my($mail,$smtp,@hosts);
+    my $src  = shift;
+    my %opt = @_;
+    my $host = $opt{Host};
+    my $noquit = 0;
+    my $smtp;
 
- require Net::SMTP;
+    unless(defined($host)) {
+	my @hosts = qw(mailhost localhost);
+	unshift(@hosts, split(/:/, $ENV{SMTPHOSTS})) if(defined $ENV{SMTPHOSTS});
 
- @hosts = qw(mailhost localhost);
- unshift(@hosts, split(/:/, $ENV{SMTPHOSTS})) if(defined $ENV{SMTPHOSTS});
+	foreach $host (@hosts) {
+	    $smtp = eval { Net::SMTP->new($host) };
+	    last if(defined $smtp);
+	}
+    }
+    elsif(ref($host) && UNIVERSAL::isa($host,'Net::SMTP')) {
+	$smtp = $host;
+	$noquit = 1;
+    }
+    else {
+	$smtp = eval { Net::SMTP->new($host) };
+    }
 
- foreach $host (@hosts) {
-  $smtp = eval { Net::SMTP->new($host) };
-  last if(defined $smtp);
- }
+    return ()
+	unless(defined $smtp);
 
- croak "Cannot initiate a SMTP connection" unless(defined $smtp);
+    $smtp->hello( hostname() );
+    my $hdr = $src->head->dup;
 
- $smtp->hello( hostname() );
- $mail = $src->dup;
+    _prephdr($hdr);
 
- $mail->delete('From '); # Just in case :-)
+    # Who is it to
 
- $mail->replace('X-Mailer', "Perl5 Mail::Internet v" . $Mail::Internet::VERSION);
+    my @rcpt = map { ref($_) ? @$_ : $_ } grep { defined } @opt{'To','Cc','Bcc'};
+    @rcpt = map { $hdr->get($_) } qw(To Cc Bcc)
+	unless @rcpt;
+    my @addr = map($_->address, Mail::Address->parse(@rcpt));
 
- # Ensure the mail has the following headers
- # Sender, From, Reply-To
+    return ()
+	unless(@addr);
 
- my($from,$name,$tag);
+    $hdr->delete('Bcc'); # Remove blind Cc's
 
- $name = (getpwuid($>))[6] || $ENV{NAME} || "";
- while($name =~ s/\([^\(]*\)//) { 1; }
+    # Send it
 
- $from = sprintf "%s <%s>", $name, mailaddress();
- $from =~ s/\s{2,}/ /g;
+    my $ok = $smtp->mail( mailaddress() ) &&
+		$smtp->to(@addr) &&
+		$smtp->data(join("", @{$hdr->header},"\n",@{$src->body}));
 
- foreach $tag (qw(Sender From Reply-To))
-  {
-   $mail->add($tag,$from) unless($mail->get($tag));
-  }
+    $smtp->quit
+	unless $noquit;
 
- # An original message should not have any Received lines
-
- $mail->delete('Received');
-
- # Who is it to
-
- my @rcpt = ($mail->get('To', 'Cc', 'Bcc'));
- my @addr = map($_->address, Mail::Address->parse(@rcpt));
-
- return () unless(@addr);
-
- $mail->delete('Bcc'); # Remove blind Cc's
-
- # Send it
-
- my $ok = $smtp->mail( mailaddress() ) &&
-            $smtp->to(@addr) &&
-            $smtp->data(join("", @{$mail->header},"\n",@{$mail->body}));
-
- $smtp->quit;
-
- $ok ? @addr : ();
+    $ok ? @addr : ();
 }
 
 sub nntppost;
 
 use Mail::Util qw(mailaddress);
-
-
-require Net::NNTP;
+use Net::NNTP;
+use strict;
 
  sub nntppost
 {
- my $mail = shift;
- my %opt = @_;
+    my $mail = shift;
+    my %opt = @_;
 
- my $groups = $mail->get('Newsgroups') || "";
- my @groups = split(/[\s,]+/,$groups);
+    my $groups = $mail->get('Newsgroups') || "";
+    my @groups = split(/[\s,]+/,$groups);
 
- return () unless @groups;
+    return ()
+	unless @groups;
 
- my $art = $mail->dup;
+    my $hdr = $mail->head->dup;
 
- $art->replace('X-Mailer', "Perl5 Mail::Internet v" . $Mail::Internet::VERSION);
+    _prephdr($hdr);
 
- unless($art->get('From'))
-  {
-   my $name = $ENV{NAME} || (getpwuid($>))[6];
-   while( $name =~ s/\([^\(]*\)// ) {1};
-   $art->replace('From',$name . " <" . mailaddress() . ">");
-  }
+    # Remove these incase the NNTP host decides to mail as well as me
+    $hdr->delete(qw(To Cc Bcc)); 
 
- # Remove these incase the NNTP host decides to mail as well as me
- $art->delete(qw(To Cc Bcc)); 
+    my $news;
+    my $noquit = 0;
+    my $host = $opt{Host};
 
- my @opt = ();
- push(@opt, $opt{'Host'}) if exists $opt{'Host'};
- push(@opt, 'Port', $opt{'Port'}) if exists $opt{'Port'};
- push(@opt, 'Debug', $opt{'Debug'}) if exists $opt{'Debug'};
-warn join(" ",@opt);
- my $news = new Net::NNTP(@opt) or return ();
+    if(ref($host) && UNIVERSAL::isa($host,'Net::NNTP')) {
+	$news = $host;
+	$noquit = 1;
+    }
+    else {
+	my @opt = ();
 
- $news->post(@{$art->header},"\n",@{$art->body});
+	push(@opt, $opt{'Host'});
 
- my $code = $news->code;
- $news->quit;
+	push(@opt, 'Port', $opt{'Port'})
+	    if exists $opt{'Port'};
 
- return 240 == $code ? @groups : ();
+	push(@opt, 'Debug', $opt{'Debug'})
+	    if exists $opt{'Debug'};
+
+	$news = new Net::NNTP(@opt)
+	    or return ();
+    }
+
+    $news->post(@{$hdr->header},"\n",@{$mail->body});
+
+    my $code = $news->code;
+
+    $news->quit
+	unless $noquit;
+
+    return 240 == $code ? @groups : ();
 }
 
 sub escape_from
@@ -644,7 +718,7 @@ manipulating and writing a message with RFC822 compliant headers.
 
 C<ARG> is optiona and may be either a file descriptor (reference to a GLOB)
 or a reference to an array. If given the new object will be
-initialized with headers either from the array of read from 
+initialized with headers and body either from the array of read from 
 the file descriptor.
 
 C<OPTIONS> is a list of options given in the form of key-value
@@ -693,6 +767,16 @@ output will be sent to STDOUT.
 
     $mail->print( \*STDOUT );  # Print message to STDOUT
 
+=item as_string ()
+
+Returns the message as a single string.
+
+=item as_mbox_string ( [ ALREADY_ESCAPED ] )
+
+Returns the message as a string in mbox format.  C<ALREADY_ESCAPED>, if
+given and true, indicates that ->escape_from has already been called on
+this object.
+
 =item head ()
 
 Returns the C<Mail::Header> object which holds the headers for the current
@@ -731,18 +815,12 @@ Append a signature to the message. C<FILE> is a file which contains
 the signature, if not given then the file "$ENV{HOME}/.signature"
 will be checked for.
 
-=item smtpsend ()
+=item smtpsend ( [ OPTIONS ] )
 
-Send a Mail::Internet message via SMTP
+Send a Mail::Internet message via SMTP, requires Net::SMTP
 
-The message will be sent to all addresses on the To, Cc and Bcc
-lines. The SMTP host is found by attempting connections first
-to hosts specified in C<$ENV{SMTPHOSTS}>, a colon separated list,
-then C<mailhost> and C<localhost>.
-
-=item nntppost ( [ OPTIONS ] )
-
-Post an article via NNTP, require Net::NNTP.
+The return value will be a list of email addresses that the message was sent
+to. If the message was not sent the list will be empty.
 
 Options are passed as key-value pairs. Current options are
 
@@ -750,7 +828,35 @@ Options are passed as key-value pairs. Current options are
 
 =item Host
 
-Name of NNTP server to connect to
+Name of the SMTP server to connect to, or a Net::SMTP object to use
+
+If C<Host> is not given then the SMTP host is found by attempting
+connections first to hosts specified in C<$ENV{SMTPHOSTS}>, a colon
+separated list, then C<mailhost> and C<localhost>.
+
+=item To
+
+=item Cc
+
+=item Bcc
+
+Send the email to the given addresses, each can be either a string or
+a reference to a list of email addresses. If none of C<To>, <Cc> or C<Bcc>
+are given then the addresses are extracted from the message being sent.
+
+=back
+
+=item nntppost ( [ OPTIONS ] )
+
+Post an article via NNTP, requires Net::NNTP.
+
+Options are passed as key-value pairs. Current options are
+
+=over 4
+
+=item Host
+
+Name of NNTP server to connect to, or a Net::NNTP object to use.
 
 =item Port
 

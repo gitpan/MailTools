@@ -1,116 +1,16 @@
 # Mail::Address.pm
 #
-# Copyright (c) 1995-7 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1995-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Mail::Address;
 use strict;
 
-=head1 NAME
-
-Mail::Address - Parse mail addresses
-
-=head1 SYNOPSIS
-
-    use Mail::Address;
-    
-    my @addrs = Mail::Address->parse($line);
-    
-    foreach $addr (@addrs) {
-	print $addr->format,"\n";
-    }
-
-=head1 DESCRIPTION
-
-C<Mail::Address> extracts and manipulates RFC822 compilant email
-addresses. As well as being able to create C<Mail::Address> objects
-in the normal manner, C<Mail::Address> can extract addresses from
-the To and Cc lines found in an email message.
-
-=head1 CONSTRUCTORS
-
-=over 4
-
-=item new( PHRASE,  ADDRESS, [ COMMENT ])
-
- Mail::Address->new("Perl5 Porters", "perl5-porters@africa.nicoh.com");
-
-Create a new C<Mail::Address> object which represents an address with the
-elements given. In a message these 3 elements would be seen like:
-
- PHRASE <ADDRESS> (COMMENT)
- ADDRESS (COMMENT)
-
-=item parse( LINE )
-
- Mail::Address->parse($line);
-
-Parse the given line a return a list of extracted C<Mail::Address> objects.
-The line would normally be one taken from a To,Cc or Bcc line in a message
-
-=back
-
-=head1 METHODS
-
-=over 4
-
-=item phrase ()
-
-Return the phrase part of the object.
-
-=item address ()
-
-Return the address part of the object.
-
-=item comment ()
-
-Return teh comment part of the object
-
-=item format ()
-
-Return a string representing the address in a suitable form to be placed
-on a To,Cc or Bcc line of a message
-
-=item name ()
-
-Using the information contained within the object attempt to identify what
-the person or groups name is
-
-=item host ()
-
-Return the address excluding the user id and '@'
-
-=item user ()
-
-Return the address excluding the '@' and the mail domain
-
-=item path ()
-
-Unimplemented yet but should return the UUCP path for the message
-
-=item canon ()
-
-Unimplemented yet but should return the UUCP canon for the message
-
-=back
-
-=head1 AUTHOR
-
-Graham Barr <gbarr@pobox.com>
-
-=head1 COPYRIGHT
-
-Copyright (c) 1995-7 Graham Barr. All rights reserved. This program is free
-software; you can redistribute it and/or modify it under the same terms
-as Perl itself.
-
-=cut
-
 use Carp;
 use vars qw($VERSION);
 
-$VERSION = do { my @r=(q$Revision: 1.12 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.15";
 sub Version { $VERSION }
 
 #
@@ -119,17 +19,48 @@ sub Version { $VERSION }
 
 sub _extract_name
 {
- local $_ = shift || '';
- s/\A\(|\)\Z//go;	# (...)
+    local $_ = shift || '';
+    
+    # trim whitespace
+    s/^\s+//;
+    s/\s+$//;
+    s/\s+/ /;
 
- s/\(.*\)//go;		# remove inbeded comments
+    # Disregard numeric names (e.g. 123456.1234@compuserve.com)
+    return "" if /^[\d ]+$/;
 
- s/(([a-z]+|[a-z]\-[a-z])+)\s*,?\s*(([a-z]\s*\.\s*)+)(\[^\sa-z]|\Z)/$3 $1/io;	# change Barr, G. M. => G. M. Barr
- s/\A[^a-z]*(([a-z \-\.]|[a-z]\-[a-z])+).*/$1/igo;			# remove leading/trailing punctuation
+    # remove outermost parenthesis
+    s/^\(|\)$//g;
 
- s/[\.\s]+/ /go;		# change . => ' ' and condense spaces
+    # remove outer quotation marks
+    s/^"|"$//g;
 
- return $_;
+    # remove embedded comments
+    s/\(.*\)//g;
+
+    # reverse "Last, First M." if applicable
+    s/^([^\s]+) ?, ?(.*)$/$2 $1/;
+    s/,.*//;
+
+    # Set the case of the name to first char upper rest lower
+    # Upcase first letter on name
+    s/\b([a-z]+)/\L\u$1/igo;
+
+    # Scottish names such as 'McLeod'
+    s/\bMc([a-z])/Mc\u$1/igo;
+
+    # Irish names such as 'O'Malley, O'Reilly'
+    s/\bo'([a-z])/O'\u$1/igo;
+
+    # Roman numerals, eg 'Level III Support'
+    s/\b(x*(ix)?v*(iv)?i*)\b/\U$1/igo; 
+
+    # some cleanup
+    s/\[[^\]]*\]//g;
+    s/(^[\s'"]+|[\s'"]+$)//g;
+    s/\s{2,}/ /g;
+
+    return $_;
 }
 
 sub _tokenise {
@@ -230,7 +161,7 @@ sub parse {
  my @objs    = ();
  my $depth   = 0;
  my $idx = 0;
- my $tokens = _tokenise(@_);
+ my $tokens = _tokenise(grep { defined $_} @_);
  my $len = scalar(@{$tokens});
  my $next = _find_next($idx,$tokens,$len);
 
@@ -310,6 +241,10 @@ sub format {
    else {
     push(@tmp, $addr) if(defined $addr && length($addr));
    }
+   if($comment =~ /\S/) {
+    $comment =~ s/^\s*\(?/(/;
+    $comment =~ s/\)?\s*$/)/;
+   }
    push(@tmp, $comment) if(defined $comment && length($comment));
    push(@fmts, join(" ", @tmp)) if(scalar(@tmp));
  }
@@ -318,42 +253,33 @@ sub format {
 }
 
 
-sub name {
- my $me = shift;
- my $phrase = $me->phrase;
- my $addr = $me->address;
-
- $phrase = $me->comment unless(defined($phrase) && length($phrase));
-
- my $name = _extract_name($phrase);
- 
- if($name eq '' && $addr =~ /([^\%\.\@\_]+([\.\_][^\%\.\@\_]+)+)[\@\%]/o)	# first.last@domain address
-  {
-   ($name = $1) =~ s/[\.\_]+/ /go;
-   $name = _extract_name($name);
-  }
- 
- if($name eq '' && $addr =~ m#/g=#oi)	# X400 style address
-  {
-   my ($f) = $addr =~ m#g=([^/]*)#oi;
-   my ($l) = $addr =~ m#s=([^/]*)#io;
- 
-   $name = _extract_name($f . " " . $l);
-  }
-
- #
- # Set the case of the name to first char upper rest lower
- #
-
- $name =~ s/\b([a-z]+)/\L\u$1/igo; 	    # Upcase first letter on name
- $name =~ s/\bMc([a-z])/Mc\u$1/igo;	    # Scottish names such as 'McLeod'
- $name =~ s/\b(x*(ix)?v*(iv)?i*)\b/\U$1/igo; # Roman numerals
-					    #   eg 'Level III Support'
-
- # Roman numerals upto M (I think ?)
- # m*([cxi]m)?d*([cxi]d)?c*([xi]c)?l*([xi]l)?x*(ix)?v*(iv)?i*
- $name =~ s/(\A\s+|\s+\Z)//go;
- return length($name) ? $name : undef;
+sub name 
+{
+    my $me = shift;
+    my $phrase = $me->phrase;
+    my $addr = $me->address;
+    
+    $phrase = $me->comment unless(defined($phrase) && length($phrase));
+    
+    my $name = _extract_name($phrase);
+    
+    # first.last@domain address
+    if($name eq '' && $addr =~ /([^\%\.\@\_]+([\.\_][^\%\.\@\_]+)+)[\@\%]/o)
+    {
+	($name = $1) =~ s/[\.\_]+/ /go;
+	$name = _extract_name($name);
+    }
+    
+    if($name eq '' && $addr =~ m#/g=#oi)	
+    # X400 style address
+    {
+	my ($f) = $addr =~ m#g=([^/]*)#oi;
+	my ($l) = $addr =~ m#s=([^/]*)#io;
+	
+	$name = _extract_name($f . " " . $l);
+    }   
+       
+       return length($name) ? $name : undef;
 }
 
 
@@ -391,4 +317,106 @@ sub canon {
 
 1;
 
+
+__END__
+
+=head1 NAME
+
+Mail::Address - Parse mail addresses
+
+=head1 SYNOPSIS
+
+    use Mail::Address;
+    
+    my @addrs = Mail::Address->parse($line);
+    
+    foreach $addr (@addrs) {
+	print $addr->format,"\n";
+    }
+
+=head1 DESCRIPTION
+
+C<Mail::Address> extracts and manipulates RFC822 compilant email
+addresses. As well as being able to create C<Mail::Address> objects
+in the normal manner, C<Mail::Address> can extract addresses from
+the To and Cc lines found in an email message.
+
+=head1 CONSTRUCTORS
+
+=over 4
+
+=item new( PHRASE,  ADDRESS, [ COMMENT ])
+
+ Mail::Address->new("Perl5 Porters", "perl5-porters@africa.nicoh.com");
+
+Create a new C<Mail::Address> object which represents an address with the
+elements given. In a message these 3 elements would be seen like:
+
+ PHRASE <ADDRESS> (COMMENT)
+ ADDRESS (COMMENT)
+
+=item parse( LINE )
+
+ Mail::Address->parse($line);
+
+Parse the given line a return a list of extracted C<Mail::Address> objects.
+The line would normally be one taken from a To,Cc or Bcc line in a message
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item phrase ()
+
+Return the phrase part of the object.
+
+=item address ()
+
+Return the address part of the object.
+
+=item comment ()
+
+Return the comment part of the object
+
+=item format ()
+
+Return a string representing the address in a suitable form to be placed
+on a To,Cc or Bcc line of a message
+
+=item name ()
+
+Using the information contained within the object attempt to identify what
+the person or groups name is
+
+=item host ()
+
+Return the address excluding the user id and '@'
+
+=item user ()
+
+Return the address excluding the '@' and the mail domain
+
+=item path ()
+
+Unimplemented yet but should return the UUCP path for the message
+
+=item canon ()
+
+Unimplemented yet but should return the UUCP canon for the message
+
+=back
+
+=head1 AUTHOR
+
+Graham Barr <gbarr@pobox.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1995-8 Graham Barr. All rights reserved. This program is free
+software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
+
+=cut
 

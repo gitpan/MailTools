@@ -19,7 +19,14 @@ bin/forwd_demo.PL		example script to forward a message
 bin/rplyto_demo.PL		example script to reply to a message
 bin/send_demo.PL		example script to send a message using sendmail
 t/extract.t
+t/header.t
+t/internet.t
 t/mailcap.t
 t/mailer.t
 t/require.t
 t/send.t
+Mail/Mailer/mail.pm
+Mail/Mailer/rfc822.pm
+Mail/Mailer/sendmail.pm
+Mail/Mailer/smtp.pm
+Mail/Mailer/test.pm

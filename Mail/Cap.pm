@@ -5,7 +5,7 @@ use strict;
 
 use vars qw($VERSION $useCache);
 
-$VERSION = do { my @r=(q$Revision: 1.5 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.06";
 sub Version { $VERSION; }
 
 =head1 NAME
@@ -38,9 +38,16 @@ types are:
 
 $useCache = 1;  # don't evaluate tests every time
 
-my @path = split(/:/, $ENV{MAILCAPS} ||
-  "$ENV{HOME}/.mailcap:/etc/mailcap:/usr/etc/mailcap:/usr/local/etc/mailcap");
-  # this path is specified under RFC 1524 appendix A 
+my @path;
+
+if($^O eq "MacOS") {
+    @path = split(/,/, $ENV{MAILCAPS} ||
+	"$ENV{HOME}mailcap");
+} else {
+    @path = split(/:/, $ENV{MAILCAPS} ||
+	# this path is specified under RFC 1524 appendix A 
+	"$ENV{HOME}/.mailcap:/etc/mailcap:/usr/etc/mailcap:/usr/local/etc/mailcap");
+}
 
 
 =head1 METHODS

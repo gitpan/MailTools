@@ -5,7 +5,7 @@
 
 $NAME     = 'Mail';
 $DISTNAME = "MailTools";
-$VERSION  = "1.11";
+$VERSION  = "1.12";
 
 BEGIN { require 5.001 }
 
@@ -23,8 +23,6 @@ sub MY::libscan
 	   $path =~ m:[~%]$: ||
 	   $path =~ m:\.(orig|rej|nfs)$:
 	  );
- return ''
-	if $] < 5.004 and $path =~ m:/Mail/Field:;
  $path;
 }
 

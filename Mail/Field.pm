@@ -154,7 +154,29 @@ use Carp;
 use strict;
 use vars qw($AUTOLOAD $VERSION);
 
-$VERSION = "1.05";
+$VERSION = "1.06";
+
+unless(defined &UNIVERSAL::can) {
+    *UNIVERSAL::can = sub {
+	my($obj,$meth) = @_;
+	my $pkg = ref($obj) || $obj;
+	my @pkg = ($pkg);
+	my %done;
+	while(@pkg) {
+            $pkg = shift @pkg;
+            next if exists $done{$pkg};
+            $done{$pkg} = 1;
+
+	    no strict 'refs';
+
+            unshift @pkg,@{$pkg . "::ISA"}
+        	if(@{$pkg . "::ISA"});
+            return \&{$pkg . "::" . $meth}
+        	if defined(&{$pkg . "::" . $meth});
+	}
+	undef;
+    }
+}
 
 sub _header_pkg_name
 {

@@ -40,6 +40,10 @@ and C<mail> (in this order).
 Use the C<sendmail> program to deliver the mail.  C<$command> is the
 path to C<sendmail>.
 
+=item C<smtp>
+
+Use the C<smtp> protocol via Net::SMTP to deliver the mail.
+
 =item C<test>
 
 Used for debugging, this calls C</bin/echo> to display the data.  No
@@ -114,7 +118,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.15"; # $Id: //depot/MailTools/Mail/Mailer.pm#9$
+$VERSION = "1.17"; # $Id: //depot/MailTools/Mail/Mailer.pm#12$
 
 sub Version { $VERSION }
 
@@ -129,7 +133,7 @@ sub Version { $VERSION }
     # Headers-blank-Body all on stdin
     'sendmail'  =>      '/usr/lib/sendmail;/usr/sbin/sendmail;/usr/ucblib/sendmail',
 
-    'smtp'	=> 	'telnet',
+    'smtp'	=> 	undef,
     'test'	=> 	'test'
 );
 
@@ -139,10 +143,10 @@ sub Version { $VERSION }
     my $cmd = is_exe('mailx;Mail;mail');
     my $osname = $Config{'osname'};
 
-    if($osname =~ /solaris/io) {
+    if($osname =~ /(?:dgux)|(?:solaris)/io) {
 	$cmd .= " -~";
     }
-    elsif($osname =~ /(?:linux)|(?:bsdos)/io) {
+    elsif($osname =~ /(?:linux)|(?:bsdos)|(?:freebsd)/io) {
 	$cmd .= " -I";
     }
     push @Mailers, 'mail', $cmd;
@@ -156,7 +160,11 @@ $MailerBinary = undef;
 
 # does this really need to be done? or should a default mailer be specfied?
 
-{
+if($^O eq 'MacOS') {
+    $MailerType = 'smtp';
+    $MailerBinary = $Mailers{$MailerType};
+}
+else {
     my $i;
     for($i = 0 ; $i < @Mailers ; $i += 2) {
 	$MailerType = $Mailers[$i];
@@ -217,17 +225,23 @@ sub is_exe {
 
 sub new {
     my($class, $type, @args) = @_;
-    my ($exe) = is_exe ($Mailers{$type}) if defined $type;
-
-    $exe  = $MailerBinary  unless $exe;
-    croak "No mailer type specified (and no default available), thus can not find executable program."
-	unless $exe;
 
     $type = $MailerType unless $type;
     croak "Mailer '$type' not known, please specify correct type"
 	unless $type;
 
+    my $exe = $Mailers{$type};
+
+    if(defined($exe)) {
+	$exe = is_exe ($exe) if defined $type;
+
+	$exe  = $MailerBinary  unless $exe;
+	croak "No mailer type specified (and no default available), thus can not find executable program."
+	    unless $exe;
+    }
+
     $class = "Mail::Mailer::$type";
+    eval "require $class" or die $@;
     my $glob = $class->SUPER::new; # local($glob) = gensym;	# Make glob for FileHandle and attributes
 
     %{*$glob} = (Exe 	=> $exe,
@@ -240,14 +254,16 @@ sub new {
 
 sub open {
     my($self, $hdrs) = @_;
-    my $exe = *$self->{Exe} || Carp::croak "$self->open: bad exe";
+    my $exe = *$self->{Exe}; # || Carp::croak "$self->open: bad exe";
     my $args = *$self->{Args};
     my @to = $self->who_to($hdrs);
     
     $self->close;	# just in case;
 
     # Fork and start a mailer
-    open($self,"|-") || $self->exec($exe, $args, \@to) || die $!;
+    (defined($exe) && open($self,"|-"))
+	|| $self->exec($exe, $args, \@to)
+	|| die $!;
 
     # Set the headers
     $self->set_headers($hdrs);
@@ -270,7 +286,6 @@ sub can_cc { 1 }	# overridden in subclass for mailer that can't
 sub who_to {
     my($self, $hdrs) = @_;
     my @to = $self->to_array($hdrs->{To});
-
     if (!$self->can_cc) {  # Can't cc/bcc so add them to @to
 	push(@to, $self->to_array($hdrs->{Cc})) if $hdrs->{Cc};
 	push(@to, $self->to_array($hdrs->{Bcc})) if $hdrs->{Bcc};
@@ -294,110 +309,6 @@ sub close {
 sub DESTROY {
     my $self = shift;
     $self->close;
-}
-
-##
-##
-##
-
-package Mail::Mailer::rfc822;
-use vars qw(@ISA);
-@ISA = qw(Mail::Mailer);
-
-sub set_headers {
-    my $self = shift;
-    my $hdrs = shift;
-    local($\)="";
-    foreach(keys %$hdrs) {
-	next unless m/^[A-Z]/;
-	print $self "$_: ", join(",", $self->to_array($hdrs->{$_})), "\n";
-    }
-    print $self "\n";	# terminate headers
-}
-
-##
-##
-##
-
-package Mail::Mailer::sendmail;
-use vars qw(@ISA);
-@ISA = qw(Mail::Mailer::rfc822);
-
-
-sub exec {
-    my($self, $exe, $args, $to) = @_;
-    # Fork and exec the mailer (no shell involved to avoid risks)
-
-    # We should always use a -t on sendmail so that Cc: and Bcc: work
-    #  Rumor: some sendmails may ignore or break with -t (AIX?)
-    exec(( $exe, '-t', @$args, @$to ));
-}
-
-##
-##
-##
-
-package Mail::Mailer::mail;
-use vars qw(@ISA);
-@ISA = qw(Mail::Mailer);
-
-my %hdrs = qw(Cc ~c Bcc ~b Subject ~s);
-
-sub set_headers {
-    my $self = shift;
-    my $hdrs = shift;
-    my($k,$v);
-
-    while(($k,$v) = each %hdrs) {
-	print $self join(" ",$v, $self->to_array($hdrs->{$k})), "\n"
-		if defined $hdrs->{$k};
-    }
-}
-
-sub exec {
-    open(STDOUT,">/dev/null"); # this is not portable !!!!
-    open(STDERR,">/dev/null"); # this is not portable !!!!
-    shift->SUPER::exec(@_);
-}
-
-##
-##
-##
-
-package Mail::Mailer::smtp;		# just for fun
-use vars qw(@ISA);
-@ISA = qw(Mail::Mailer::rfc822);
-
-sub exec {
-    my($self, $exe, $args, $to) = @_;
-    exec($exe, 'localhost', 'smtp');
-}
-
-sub set_headers {
-    my $self = @_;
-    Carp::croak "Not implemented yet.";
-    # Now send the headers
-    $self->Mail::Mailer::rfc822::set_headers();
-}
-
-sub epilogue {
-    print {$_[0]} ".\n";
-
-}
-
-##
-##
-##
-
-package Mail::Mailer::test;
-use vars qw(@ISA);
-@ISA = qw(Mail::Mailer::rfc822);
-
-sub can_cc { 0 }
-
-sub exec {
-    my($self, $exe, $args, $to) = @_;
-    exec('sh', '-c', "echo to: " . join(" ",@{$to}) . "; cat");
 }
 
 1;

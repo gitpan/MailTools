@@ -1,27 +1,25 @@
 # Mail::Util.pm
 #
-# Copyright (c) 1995-7 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1995-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 package Mail::Util;
+
 use strict;
-
 use vars qw($VERSION @ISA @EXPORT_OK);
-
 use AutoLoader ();
 use Exporter ();
-use Carp;
 
 BEGIN {
     require 5.000;
 
-    $VERSION = "1.14";
+    $VERSION = "1.16";
 
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
-    @ISA = qw(Exporter AutoLoader);
+    @ISA = qw(Exporter);
 
-    @EXPORT_OK = qw(read_mbox maildomain mailaddress smtpsend);
+    @EXPORT_OK = qw(read_mbox maildomain mailaddress);
 }
 
 1;
@@ -76,145 +74,166 @@ as Perl itself.
 
 __END__
 
-sub read_mbox;
+sub read_mbox {
+    my $file  = shift;
+    my @mail  = ();
+    my $mail  = [];
+    my $blank = 1;
+    local *FH;
+    local $_;
 
+    open(FH,"< $file") or
+	do {
+	    require Carp;
+	    Carp::croak("cannot open '$file': $!\n");
+	};
 
-use FileHandle;
-use Carp;
-require POSIX;
+    while(<FH>) {
+	if($blank && /\AFrom .*\d{4}/) {
+	    push(@mail, $mail) if scalar(@{$mail});
+	    $mail = [ $_ ];
+	    $blank = 0;
+	}
+	else {
+	    $blank = m#\A\Z#o ? 1 : 0;
+	    push(@{$mail}, $_);
+	}
+    }
 
- sub read_mbox {
- my $file  = shift;
- my $fd    = FileHandle->new($file,"r") || croak "cannot open '$file': $!\n";
- my @mail  = ();
- my $mail  = [];
- my $blank = 1;
+    push(@mail, $mail) if scalar(@{$mail});
 
- local $_;
+    close(FH);
 
- while(<$fd>) {
-  if($blank && /\AFrom .*\d{4}/) {
-   push(@mail, $mail) if scalar(@{$mail});
-   $mail = [ $_ ];
-   $blank = 0;
-  }
-  else {
-   $blank = m#\A\Z#o ? 1 : 0;
-   push(@{$mail}, $_);
-  }
- }
-
- push(@mail, $mail) if scalar(@{$mail});
-
- $fd->close;
-
- return wantarray ? @mail : \@mail;
+    return wantarray ? @mail : \@mail;
 }
 
 
 sub maildomain {
 
- ##
- ## return imediately if already found
- ##
+    ##
+    ## return imediately if already found
+    ##
 
- return $domain if(defined $domain);
+    return $domain
+	if(defined $domain);
 
- ##
- ## Try sendmail config file if exists
- ##
+    ##
+    ## Try sendmail config file if exists
+    ##
 
- local *CF;
- my @sendmailcf = qw(/etc /etc/sendmail /etc/ucblib /etc/mail /usr/lib /var/adm/sendmail);
+    local *CF;
+    my @sendmailcf = qw(/etc
+			/etc/sendmail
+			/etc/ucblib
+			/etc/mail
+			/usr/lib
+			/var/adm/sendmail);
 
- my $config = (grep(-r, map("$_/sendmail.cf", @sendmailcf)))[0];
+    my $config = (grep(-r, map("$_/sendmail.cf", @sendmailcf)))[0];
 
- if(defined $config && open(CF,$config)) {
-  while(<CF>) {
-   if(/\ADH(\S+)/) {
-    $domain = $1;
-    last;
-   }
-  }
-  close(CF);
-  return $domain if(defined $domain);
- }
+    if(defined $config && open(CF,$config)) {
+	my %var;
+	while(<CF>) {
+	    if(/\AD([a-zA-Z])([\w.]+)/) {
+		my($v,$arg) = ($1,$2);
+		$arg =~ s/\$([a-zA-Z])/exists $var{$1} ? $var{$1} : '$' . $1/eg;
+		$var{$v} = $arg;
+	    }
+	}
+	close(CF);
+	$domain = $var{'j'} if defined $var{'j'};
+	$domain = $var{'M'} if defined $var{'M'};
+	return $domain
+	    if(defined $domain);
+    }
 
- ##
- ## Try smail config file if exists
- ##
+    ##
+    ## Try smail config file if exists
+    ##
 
- if(open(CF,"/usr/lib/smail/config")) {
-  while(<CF>) {
-   if(/\A\s*hostnames?\s*=\s*(\S+)/) {
-    $domain = (split(/:/,$1))[0];
-    last;
-   }
-  }
-  close(CF);
-  return $domain if(defined $domain);
- }
+    if(open(CF,"/usr/lib/smail/config")) {
+	while(<CF>) {
+	    if(/\A\s*hostnames?\s*=\s*(\S+)/) {
+		$domain = (split(/:/,$1))[0];
+		last;
+	    }
+	}
+	close(CF);
 
- ##
- ## Try a SMTP connection to 'mailhost'
- ##
+	return $domain
+	    if(defined $domain);
+    }
 
- if(eval "require Net::SMTP") {
-  my $host;
+    ##
+    ## Try a SMTP connection to 'mailhost'
+    ##
 
-  foreach $host (qw(mailhost localhost)) {
-   my $smtp = eval { Net::SMTP->new($host) };
+    if(eval { require Net::SMTP }) {
+	my $host;
 
-   if(defined $smtp) {
-    $domain = $smtp->domain;
-    $smtp->quit;
-    last;
-   }
-  }
- }
+	foreach $host (qw(mailhost localhost)) {
+	    my $smtp = eval { Net::SMTP->new($host) };
 
- ##
- ## Use internet(DNS) domain name, if it can be found
- ##
+	    if(defined $smtp) {
+		$domain = $smtp->domain;
+		$smtp->quit;
+		last;
+	    }
+	}
+    }
 
- unless(defined $domain) {
-  if(eval "require Net::Domain") {
-   $domain = Net::Domain::domainname();
-  }
- }
+    ##
+    ## Use internet(DNS) domain name, if it can be found
+    ##
 
- $domain = "localhost" unless(defined $domain);
+    unless(defined $domain) {
+	if(eval { require Net::Domain } ) {
+	    $domain = Net::Domain::domainname();
+	}
+    }
 
- return $domain;
+    $domain = "localhost"
+	unless(defined $domain);
+
+    return $domain;
 }
 
 
 sub mailaddress {
 
- ##
- ## Return imediately if already found
- ##
+    ##
+    ## Return imediately if already found
+    ##
 
- return $mailaddress if(defined $mailaddress);
+    return $mailaddress
+	if(defined $mailaddress);
 
- ##
- ## Get user name from environment
- ##
+    ##
+    ## Get user name from environment
+    ##
 
- $mailaddress = $ENV{MAILADDRESS} ||
-                $ENV{USER} ||
-                $ENV{LOGNAME} ||
-                (getpwuid($>))[6] ||
-                "postmaster";
+    $mailaddress = $ENV{MAILADDRESS};
 
- ##
- ## Add domain if it does not exist
- ##
+    unless ($mailaddress || $^O ne 'MacOS') {
+	require Mac::InternetConfig;
+	Mac::InternetConfig->import();
 
- $mailaddress .= "@" . maildomain() unless($mailaddress =~ /\@/);
+	$mailaddress = $InternetConfig{kICEmail()};
+    }
 
- $mailaddress;
+    $mailaddress ||= $ENV{USER} ||
+                     $ENV{LOGNAME} ||
+                     eval { (getpwuid($>))[6] } ||
+                     "postmaster";
+
+    ##
+    ## Add domain if it does not exist
+    ##
+
+    $mailaddress .= '@' . maildomain()
+	unless($mailaddress =~ /\@/);
+
+    $mailaddress =~ s/(^.*<|>.*$)//g;
+
+    $mailaddress;
 }
-
-
-

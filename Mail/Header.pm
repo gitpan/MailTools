@@ -19,9 +19,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-BEGIN {
-    $VERSION = "1.10";
-}
+$VERSION = "1.14";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -104,8 +102,17 @@ sub _fold_line
    # first bias towards splitting at a , or a ; >4/5 along the line
    # next split a whitespace
    # else we are looking at a single word and probably don't want to split
-
-   $_[0] =~ s/\s*(.{$min,$max}?[\,\;]|.{1,$max}[\s\n]|\S+[\s\n])/\n    $1/sg;
+   my $x = "";
+   $x .= $2 . "\n    "
+	while($_[0] =~ s/^(\s*(
+			    [^"]{$min,$max}?[\,\;]
+			   |[^"]{1,$max}[\s\n]
+			   |[^\s"]+[\s\n]
+			   |([^\s"]+("[^"]*")?)+[\s\n]
+			  ))
+			//x);
+   $x .= $_[0];
+   $_[0] = $x;
    $_[0] =~ s/(\A\s+|[\t ]+\Z)//sog;
    $_[0] =~ s/\s+\n/\n/sog;
   }
@@ -181,11 +188,11 @@ sub _fmt_line
    unless(defined $ctag && $ctag =~ /\A($FIELD_NAME|From )/oi);
 
  # Ensure the line starts with tag
- if($modify || $line !~ /\A$ctag/i)
+ if($modify || $line !~ /\A\Q$ctag\E/i)
   {
    my $xtag;
    ($xtag = $ctag) =~ s/\s*\Z//o;
-   $line =~ s/\A($ctag)?\s*/$xtag /i;
+   $line =~ s/\A(\Q$ctag\E)?\s*/$xtag /i;
   }
 
  my $maxlen = $me->{'mail_hdr_lengths'}{$tag}
@@ -389,7 +396,7 @@ sub extract
 
    $line = shift @{$arr};
    $line .= shift @{$arr}
-       while(scalar(@{$arr}) && $arr->[0] =~ /\A[ \t]+\S/o);
+       while(scalar(@{$arr}) && $arr->[0] =~ /\A[ \t]+/o);
 
    ($tag,$line) = _fmt_line($me,$tag,$line);
 
@@ -418,7 +425,7 @@ sub read
   {
    $ln = <$fd>;
 
-   if(defined $ln && defined $line && $ln =~ /\A[ \t]+\S/o)
+   if(defined $ln && defined $line && $ln =~ /\A[ \t]+/o)
     {
      $line .= $ln;
      next;
@@ -483,8 +490,8 @@ sub add
 
  _insert($me,$tag,$line,$where);
 
- $line =~ /^\S+\s/o;
- return $';		# post-match
+ $line =~ /^\S+\s(.*)/os;
+ return $1;
 }
 
 sub replace
@@ -515,8 +522,8 @@ TAG:
     }
   }
 
- $line =~ /^\S+\s*/o;
- return $';		# post-match
+ $line =~ /^\S+\s*(.*)/os;
+ return $1;
 }
 
 sub combine
@@ -641,6 +648,13 @@ sub print
   }
 
  1;
+}
+
+sub as_string
+{
+ my $me = shift;
+
+ join('', grep { defined } @{$me->{'mail_hdr_list'}});
 }
 
 sub fold_length
@@ -879,6 +893,10 @@ Returns the number of times the given atg appears in the header
 
 Print the header to the given file descriptor, or C<STDOUT> if no
 file descriptor is given.
+
+=item as_string ()
+
+Returns the header as a single string.
 
 =item fold_length ( [ TAG ], [ LENGTH ] )
 

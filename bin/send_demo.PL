@@ -8,7 +8,7 @@ use Cwd;
 unlink($script);
 $cwd = Cwd::getcwd();
 open MIR, ">$script" or die "open for writing $script: $!";
-print MIR "#!$Config{'scriptdir'}/perl -w\n";
+print MIR $Config{'startperl'}," -w\n";
 print MIR "use lib qw($cwd/blib);\n";
 print MIR <DATA>; 
 chmod(0755, $script);
