@@ -1,0 +1,15 @@
+History				Revision History & RCS Version
+MANIFEST			This File
+Makefile.PL			Perl MakeMaker Makefile
+README
+bin/forwd_demo.PL
+bin/rplyto_demo.PL		example script to reply to a message
+bin/send_demo.PL		example script to send a message using sendmail
+lib/Mail/Address.pm		Manipulation of electronic mail addresses
+lib/Mail/Cap.pm			Read mailcap files
+lib/Mail/MIME.pm		Extends Mail::RFC822 to understand MIME
+lib/Mail/Mailer.pm
+lib/Mail/RFC822.pm		Functions for RFC822 mail manipulations
+lib/Mail/Send.pm
+lib/Mail/Util.pm		Mail related utilities
+t/extract.t
