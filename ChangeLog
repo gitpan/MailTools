@@ -1,3 +1,77 @@
+Change 456 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Makefile.PL
+	- Added PPD stuff
+
+Change 429 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Makefile.PL changes
+
+Change 428 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer::sendmail
+	- Remove @$to from command line as we pass -t
+
+Change 427 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Send
+	- to,cc and bcc should pass addresses as a list not as single
+	  string of , separated addresses
+
+Change 426 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer::smtp
+	- override the close method from Mail::Mailer
+
+Change 425 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Internet
+	- _prephdr needed to use Mail::Util
+
+Change 424 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Field
+	- Generic packages do not have a file to require, so only require
+	  if !$pkg->can('stringify')
+
+Change 416 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	undef warning fix in Mail::Mailer::is_exe
+
+Change 415 on 2000/03/28 by <gbarr@pobox.com> (Graham Barr)
+
+	Changes from <tobiasb@funcom.com> (Tobias Brox)
+	Mail::Internet
+	- now have a send sub for sending emails
+	Mail::Header
+	- now have a header_hashref sub which allows modification of the
+	  object through hashrefs
+
+Change 360 on 2000/02/16 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- Fix for nested comments
+
+Change 350 on 2000/01/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- combine() should just return the line if there is only one
+
+Change 349 on 2000/01/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- Fix bug in fold_line for when a header line only contains
+	  a tag
+
+Change 335 on 1999/09/24 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Internet
+	- Added Hello option to smtpsend()
+
+Change 292 on 1999/03/31 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.13
+
 Change 291 on 1999/03/31 by <gbarr@pobox.com> (Graham Barr)
 
 	Mail::Header

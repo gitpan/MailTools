@@ -19,7 +19,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.15";
+$VERSION = "1.17";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -119,7 +119,7 @@ sub _fold_line
    $_[0] =~ s/\s+\n/\n/sog;
   }
 
- $_[0] =~ s/\A(\S+)\n\s*/$1 /so; 
+ $_[0] =~ s/\A(\S+)\n\s*(?=\S)/$1 /so; 
 }
 
 # attempt to change the case of a tag to that required by RFC822. That
@@ -476,6 +476,33 @@ sub header
  [ @{$me->{'mail_hdr_list'}} ];
 }
 
+# Return/set headers by hash reference.  This can probably be
+# optimized. I didn't want to mess much around with the internal
+# implementation as for now...
+# -- Tobias Brox <tobix@cpan.org>
+
+sub header_hashref {
+ my $me = shift;
+ my $hashref = shift;
+
+ # Extract the input data
+ for my $hdrkey (keys %$hashref) {
+   for (ref $hashref->{$hdrkey} 
+	? @{$hashref->{$hdrkey}} 
+	: $hashref->{$hdrkey}) {
+     $me->add($hdrkey, $_);
+   }
+ }
+
+ $me->fold
+    if $me->{'mail_hdr_modify'};
+
+ # Build a hash
+ my $hash={ map { $_ => [ $me->get($_) ] } keys %{$me->{'mail_hdr_hash'}} }; 
+
+ return $hash;
+}
+
 sub add
 {
  my $me = shift;
@@ -553,6 +580,10 @@ sub combine
         (_fmt_line($me,$tag, join($with,@lines),1))[1];
 
    _tidy_header($me);
+  }
+ else
+  {
+   return $me->{'mail_hdr_hash'}{$tag}[0];
   }
 
  return $line;		# post-match
@@ -855,9 +886,20 @@ Empty the C<Mail::Header> object of all lines.
 =item header ( [ ARRAY_REF ] )
 
 C<header> does multiple operations. First it will extract a header from
-the array, if gieven. It will the reformat the header, if reformatting
+the array, if given. It will the reformat the header, if reformatting
 is permitted, and finally return a reference to an array which
 contains the header in a printable form.
+
+=item header_hashref ( [ HASH_REF ] )
+
+As C<header>, but it will eventually set headers from a hash
+reference, and it will return the headers as a hash reference.
+
+The values in the hash might either be a scalar or an array reference,
+as an example:
+
+    $hashref->{From}='Tobias Brox <tobix@cpan.org>';
+    $hashref->{To}=['you@somewhere', 'me@localhost'];
 
 =item add ( TAG, LINE [, INDEX ] )
 

@@ -47,6 +47,15 @@ sub epilogue {
     untie(*$self);
 }
 
+sub close {
+    my($self, @to) = @_;
+    my $sock = ${*$self}{'sock'};
+    if ($sock && fileno($sock)) {
+        $self->epilogue;
+	close($sock);
+    }
+}
+
 package Mail::Mailer::smtp::pipe;
 
 sub TIEHANDLE {

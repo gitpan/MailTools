@@ -1,11 +1,13 @@
 require Mail::Header;
 
-print "1..18\n";
+print "1..22\n";
 
 $h = new Mail::Header;
 
 $t = 0;
 
+$h->header_hashref({hhrtest1 => 1, 
+	hhrtest2 => [1, "this test line was written by TobiX\n"]});
 $h->add('test',"a test header");
 $h->add('test',"a longer test header");
 $h->add('test',"an even longer test header");
@@ -25,6 +27,26 @@ $str = $h->get('test',2);
 print "#$str#\nnot "
 	unless $str eq "an even longer test header\n";
 printf "ok %d\n",++$t;
+
+$str = $h->get('hhrtest2',1);
+print "#$str#\nnot "
+	unless $str eq "this test line was written by TobiX\n";
+printf "ok %d\n",++$t;
+
+$href=$h->header_hashref();
+
+print "not "
+	unless $href->{Test}->[0] eq "a test header\n";
+printf "ok %d\n",++$t;
+
+print "not "
+	unless $href->{Hhrtest2}->[0];
+printf "ok %d\n",++$t;
+
+print "not "
+	unless $href->{Hhrtest1}->[0];
+printf "ok %d\n",++$t;
+
 
 $h->fold(30);
 

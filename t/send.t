@@ -21,7 +21,7 @@ printf "ok %d\n",$i++;
 $msg->subject('user@host') == 1 or print "not ";
 printf "ok %d\n",$i++;
 
-$msg->cc('user@host', 'user2@no.where') == 1 or print "not ";
+$msg->cc('user@host', 'user2@no.where') == 2 or print "not ";
 printf "ok %d\n",$i++;
 
 $msg->bcc('someone@else') == 1 or print "not ";

@@ -1,30 +1,16 @@
 # This -*- perl -*- script makes the Makefile
-# $Id: Makefile.PL,v 1.3 1997/03/04 09:22:36 gbarr Exp $
+# $Id: //depot/MailTools/Makefile.PL#10 $
 
 #--- Distribution section ---
 
 $NAME     = 'Mail';
 $DISTNAME = "MailTools";
-$VERSION  = "1.13";
+$VERSION  = "1.14";
 
 BEGIN { require 5.001 }
 
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest qw(maniread);
-
-#--- MY package
-
-sub MY::libscan
-{
- my($self,$path) = @_;
-
- return '' 
-	if($path =~ m:/(RCS|CVS|SCCS)/: ||
-	   $path =~ m:[~%]$: ||
-	   $path =~ m:\.(orig|rej|nfs)$:
-	  );
- $path;
-}
 
 #--- Installation check
 
@@ -71,20 +57,30 @@ warn "\n"
 
 #--- Write the Makefile
 
-my @clean = qw(*% *.html *.b[ac]k *.old);
+my @ppd;
 
-push @clean, map { "*/$_" } @clean;
+if ($] >= 5.00503) {
+  @ppd = (
+    AUTHOR    => 'Graham Barr <gbarr@pobox.com>',
+    ABSTRACT  => 'Various Mail related modules'
+  );
+}
 
 WriteMakefile(
 	VERSION   => $VERSION,
 	DISTNAME  => $DISTNAME,
 	NAME      => $NAME,
- 
-	'dist'    => {COMPRESS => 'gzip -9f',
-		      SUFFIX   => '.gz', 
-		      DIST_DEFAULT => 'all tardist',
-		     },
- 
-	'clean'   => {FILES => join(" ", @clean)},
+	@ppd
 );
+
+sub MY::postamble {
+
+  return '' unless $] >= 5.00503;
+
+<<'ESQ';
+
+dist : ppd
+
+ESQ
+}
 

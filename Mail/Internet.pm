@@ -522,6 +522,9 @@ sub sign
 }
 
 sub _prephdr {
+
+    use Mail::Util;
+
     my $hdr = shift;
 
     $hdr->delete('From '); # Just in case :-)
@@ -541,7 +544,7 @@ sub _prephdr {
 	$name = '"' . $name . '"';
     }
 
-    my $from = sprintf "%s <%s>", $name, mailaddress();
+    my $from = sprintf "%s <%s>", $name, Mail::Util::mailaddress();
     $from =~ s/\s{2,}/ /g;
 
     my $tag;
@@ -568,13 +571,14 @@ use strict;
     my $host = $opt{Host};
     my $noquit = 0;
     my $smtp;
+    my @hello = defined $opt{Hello} ? (Hello => $opt{Hello}) : ();
 
     unless(defined($host)) {
 	my @hosts = qw(mailhost localhost);
 	unshift(@hosts, split(/:/, $ENV{SMTPHOSTS})) if(defined $ENV{SMTPHOSTS});
 
 	foreach $host (@hosts) {
-	    $smtp = eval { Net::SMTP->new($host) };
+	    $smtp = eval { Net::SMTP->new($host, @hello) };
 	    last if(defined $smtp);
 	}
     }
@@ -583,13 +587,12 @@ use strict;
 	$noquit = 1;
     }
     else {
-	$smtp = eval { Net::SMTP->new($host) };
+	$smtp = eval { Net::SMTP->new($host, @hello) };
     }
 
     return ()
 	unless(defined $smtp);
 
-    $smtp->hello( hostname() );
     my $hdr = $src->head->dup;
 
     _prephdr($hdr);
@@ -616,6 +619,28 @@ use strict;
 	unless $noquit;
 
     $ok ? @addr : ();
+}
+
+sub send;
+
+use Mail::Mailer;
+use strict;
+
+ sub send 
+{
+    my ($src, $type, @args) = @_;
+
+    my $hdr = $src->head->dup;
+
+    _prephdr($hdr);
+
+    my $headers = $hdr->header_hashref;
+
+    # Actually send it
+    my $mailer = Mail::Mailer->new($type, @args);
+    $mailer->open($headers);
+    $src->print_body($mailer);
+    $mailer->close();
 }
 
 sub nntppost;
@@ -817,6 +842,11 @@ Append a signature to the message. C<FILE> is a file which contains
 the signature, if not given then the file "$ENV{HOME}/.signature"
 will be checked for.
 
+=item send ( [ type [ args.. ]] )
+
+Send a Mail::Internet message using Mail::Mailer.  Type and args are
+passed on to C<Mail::Mailer>
+
 =item smtpsend ( [ OPTIONS ] )
 
 Send a Mail::Internet message via SMTP, requires Net::SMTP
@@ -845,6 +875,10 @@ separated list, then C<mailhost> and C<localhost>.
 Send the email to the given addresses, each can be either a string or
 a reference to a list of email addresses. If none of C<To>, <Cc> or C<Bcc>
 are given then the addresses are extracted from the message being sent.
+
+=item Hello
+
+Send a HELO (or EHLO) command to the server with the given name.
 
 =back
 

@@ -11,7 +11,7 @@ use Carp;
 use vars qw($VERSION);
 use locale;
 
-$VERSION = "1.1501";
+$VERSION = "1.16";
 sub Version { $VERSION }
 
 #
@@ -74,18 +74,19 @@ sub _tokenise {
  while ($_ ne '')
   {
    $field = '';
-   if( /^\s*\(/ )    # (...)
+   if( s/^\s*\(/(/ )    # (...)
     {
      my $depth = 0;
 
-     while(s/^\s*(\(([^\(\)\\]|\\.)*)//)
+     PAREN: while(s/^(\(([^\(\)\\]|\\.)*)//)
       {
        $field .= $1;
        $depth++;
-       while($depth && s/^(([^\(\)\\]|\\.)*\)\s*)//)
+       while(s/^(([^\(\)\\]|\\.)*\)\s*)//)
         {
-         $depth--;
          $field .= $1;
+         last PAREN unless --$depth;
+	 $field .= $1 if s/^(([^\(\)\\]|\\.)+)//;
         }
       }
 

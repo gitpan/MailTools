@@ -1,10 +1,60 @@
-#
-package Mail::Send;
-use strict;
 
+package Mail::Send;
+
+# $Id: //depot/MailTools/Mail/Send.pm#6 $
+
+use strict;
+use Carp;
+use vars qw($VERSION);
 require Mail::Mailer;
 
-use Carp;
+$VERSION = "1.09";
+
+sub Version { $VERSION }
+
+sub new {
+    my $pkg = shift;
+    my %attr = @_;
+    my($key, $value);
+    my $me = bless {}, $pkg;
+    while( ($key, $value) = each %attr ) {
+	$key = lc($key);
+	$me->$key($value);
+    }
+    $me;
+}
+
+sub set {
+    my($me, $hdr, @values) = @_;
+    $me->{$hdr} = [ @values ] if @values;
+    @{$me->{$hdr} || []};	# return new (or original) values
+}
+
+sub add {
+    my($me, $hdr, @values) = @_;
+    $me->{$hdr} = [] unless $me->{$hdr};
+    push(@{$me->{$hdr}}, @values);
+}
+
+sub delete {
+    my($me, $hdr) = @_;
+    delete $me->{$hdr};
+}
+
+sub to		{ my $me=shift; $me->set('To', @_); }
+sub cc		{ my $me=shift; $me->set('Cc', @_); }
+sub bcc		{ my $me=shift; $me->set('Bcc', @_); }
+sub subject	{ my $me=shift; $me->set('Subject', join (' ', @_)); }
+
+
+sub open {
+    my $me = shift;
+    Mail::Mailer->new(@_)->open($me);
+}
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -57,51 +107,4 @@ E<lt>F<gbarr@pobox.com>E<gt>
 
 =cut
 
-use vars qw($VERSION);
-
-$VERSION = do { my @r=(q$Revision: 1.8 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
-sub Version { $VERSION }
-
-sub new {
-    my $pkg = shift;
-    my %attr = @_;
-    my($key, $value);
-    my $me = bless {}, $pkg;
-    while( ($key, $value) = each %attr ) {
-	$key = lc($key);
-	$me->$key($value);
-    }
-    $me;
-}
-
-sub set {
-    my($me, $hdr, @values) = @_;
-    $me->{$hdr} = [ @values ] if @values;
-    @{$me->{$hdr} || []};	# return new (or original) values
-}
-
-sub add {
-    my($me, $hdr, @values) = @_;
-    $me->{$hdr} = [] unless $me->{$hdr};
-    push(@{$me->{$hdr}}, @values);
-}
-
-sub delete {
-    my($me, $hdr) = @_;
-    delete $me->{$hdr};
-}
-
-sub to		{ my $me=shift; $me->set('To', join (',', @_)); }
-sub cc		{ my $me=shift; $me->set('Cc', join (',', @_)); }
-sub bcc		{ my $me=shift; $me->set('Bcc', join (',', @_)); }
-sub subject	{ my $me=shift; $me->set('Subject', join (' ', @_)); }
-
-
-sub open {
-    my $me = shift;
-    Mail::Mailer->new(@_)->open($me);
-}
-
-
-1;
 

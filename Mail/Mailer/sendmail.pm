@@ -10,5 +10,8 @@ sub exec {
 
     # We should always use a -t on sendmail so that Cc: and Bcc: work
     #  Rumor: some sendmails may ignore or break with -t (AIX?)
-    exec(( $exe, '-t', @$args, @$to ));
+    # Chopped out the @$to arguments, because -t means
+    # they are sent in the body, and postfix complains if they
+    # are also given on comand line.
+    exec( $exe, '-t', @$args );
 }

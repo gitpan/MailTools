@@ -121,7 +121,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.18"; # $Id: //depot/MailTools/Mail/Mailer.pm#13 $
+$VERSION = "1.19"; # $Id: //depot/MailTools/Mail/Mailer.pm#13 $
 
 sub Version { $VERSION }
 
@@ -217,10 +217,12 @@ sub is_exe {
 	return ($cmd)
 	    if (-x $name and ! -d $name and $name =~ m:/:);
 
-	my $dir;
-	foreach $dir (split(/:/, $ENV{PATH})) {
-	    return "$dir/$cmd"
-		if (-x "$dir/$name" && ! -d "$dir/$name");
+	if (defined $ENV{PATH}) {
+	    my $dir;
+	    foreach $dir (split(/:/, $ENV{PATH})) {
+		return "$dir/$cmd"
+		    if (-x "$dir/$name" && ! -d "$dir/$name");
+	    }
 	}
     }
     0;
