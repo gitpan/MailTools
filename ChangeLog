@@ -1,10 +1,24 @@
+Mon Feb 24 1997
+
+ o Release 1.09
+ o Mail::Header
+	Fixed a de-reference problem in unfold()
+	_fold_line will no longer fold the From line that gets added by
+	the user mail agent.
+ o Mail::Internet
+	Added DESTROY, to stop AutoLoader errors
+ o Mail::Mailer
+	Fixed an undef problem in new
+ o Tests
+	Added t/send.t and t/mailer.t
+
 Tue Jan 07 1996
 
  o Release 1.08
  o fixed Mail::Mailer::new so that it uses Symbol properly
    to generate the anonymous glob.
 
-Thu Jan 02 1996   Graham Barr <bodg@tiuk.ti.com>
+Thu Jan 02 1996   Graham Barr <gbarr@.ti.com>
 
  o Release 1.07
  o Removed Mail::MIME as it is now redundant.
@@ -19,57 +33,57 @@ Thu Jan 02 1996   Graham Barr <bodg@tiuk.ti.com>
  o Fixed a problem in Header.pm when return-ing line text and tag == 'From '
    length($tag) + 2 is incorrect
 
-Wed Jul 24 1996   Graham Barr <bodg@tiuk.ti.com>
+Wed Jul 24 1996   Graham Barr <gbarr@.ti.com>
 
  o  Mail::Send, Mail::Mailer Incorporated a patch from Nathan Torkington
     <gnat@frii.com> to allow headers to be passed as scalars as well as
     list-refs. It also included some doc updates. Many thanks to Nathan
 
-Tue Nov 21 1995   Graham Barr <bodg@tiuk.ti.com>
+Tue Nov 21 1995   Graham Barr <gbarr@.ti.com>
 
  o  Added Mail::Internet::nntppost and Mail::Internet::smtpsend
     as AutoLoaded methods
  o  Some small tweaks to mailaddress()
  
-Thu Nov 16 1995   Graham Barr <bodg@tiuk.ti.com>
+Thu Nov 16 1995   Graham Barr <gbarr@.ti.com>
 
  o  Modified Mail::Util to use Net::Domain
 
 
-Tue Nov  7 1995   Graham Barr <bodg@tiuk.ti.com>
+Tue Nov  7 1995   Graham Barr <gbarr@.ti.com>
 
  o  Changed name of Mail::RFC822 to Mail::Internet
 
 
-Wed Nov  1 1995   Graham Barr <bodg@tiuk.ti.com>
+Wed Nov  1 1995   Graham Barr <gbarr@.ti.com>
 
  o  Fixed remove_signature to be anchor'd to the start of the line
  o  Re-vamped the reply to method
 
 
-Fri Sep  8 1995   Graham Barr <bodg@tiuk.ti.com>
+Fri Sep  8 1995   Graham Barr <gbarr@.ti.com>
 
  o  Applied patch from Andreas Koenig to fix problem when
     the user defined $\
 
 
-Wed Aug 30 1995   Graham Barr <bodg@tiuk.ti.com>
+Wed Aug 30 1995   Graham Barr <gbarr@.ti.com>
 
  o  Updated documentation
 
 
-Tue Aug 29 1995   Graham Barr <bodg@tiuk.ti.com>
+Tue Aug 29 1995   Graham Barr <gbarr@.ti.com>
 
  o  Modified Mail::Util::maildomain to look in a list of places for sendmail.cf
 
 
-Thu Aug 24 1995   Graham Barr <bodg@tiuk.ti.com>
+Thu Aug 24 1995   Graham Barr <gbarr@.ti.com>
 
  o  Modified maildomain to look for /usr/lib/smail/config before
     attempting smtp
 
 
-Wed Aug 16 1995   Graham Barr <bodg@tiuk.ti.com>
+Wed Aug 16 1995   Graham Barr <gbarr@.ti.com>
 
  o  Modified maildomain to prepend hostname to domainname if it cannot
     find the address via SMTP
@@ -77,20 +91,20 @@ Wed Aug 16 1995   Graham Barr <bodg@tiuk.ti.com>
  o  Added mailaddress() to Mail::Util
 
 
-Tue Aug 15 1995   Graham Barr <bodg@tiuk.ti.com>
+Tue Aug 15 1995   Graham Barr <gbarr@.ti.com>
 
  o  Modified Mail::Util::maildomain to parse /etc/sendmail.cf if
     it exists and extract the mail domain
 
 
-Mon Aug 14 1995   Graham Barr <bodg@tiuk.ti.com>
+Mon Aug 14 1995   Graham Barr <gbarr@.ti.com>
 
  o  Added maildomain into Mail::Util
 
  o  Applied Andreas Koenig's patches to Mail::Mailer and Mail::Send
 
 
-Wed Jul 12 1995   Graham Barr <bodg@tiuk.ti.com>
+Wed Jul 12 1995   Graham Barr <gbarr@.ti.com>
 
  o  Added -a/-s switches to rplyto to enable a choice of reply to
     all or just the sender

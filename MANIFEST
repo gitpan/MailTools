@@ -18,4 +18,6 @@ bin/rplyto_demo.PL		example script to reply to a message
 bin/send_demo.PL		example script to send a message using sendmail
 t/extract.t
 t/mailcap.t
+t/mailer.t
 t/require.t
+t/send.t

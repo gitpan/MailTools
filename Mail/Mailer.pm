@@ -77,7 +77,7 @@ Mail::Send
 =head1 AUTHORS
 
 Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
-<bodg@tiuk.ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
+<gbarr@ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
 For support please contact comp.lang.perl.misc.
 Small fix and documentation by Nathan Torkington <gnat@frii.com>.
 
@@ -88,7 +88,7 @@ use FileHandle;
 use Symbol;
 use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 
-$VERSION = "1.08";
+$VERSION = do { my @r=(q$Revision: 1.10 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
 sub Version { $VERSION }
 
 @ISA = qw(FileHandle);
@@ -176,7 +176,7 @@ sub is_exe {
 
 sub new {
     my($class, $type, @args) = @_;
-    my ($exe) = is_exe ($Mailers{$type});
+    my ($exe) = is_exe ($Mailers{$type}) if defined $type;
 
     $exe  = $MailerBinary  unless $exe;
     croak "No mailer type specified (and no default available), thus can not find executable program."

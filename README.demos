@@ -23,13 +23,13 @@ for the new mail. Mine looks like
 --%<----%<----%<----%<----%<----%<----%<--
 To:
 Cc:
-Bcc: bodg@tiuk.ti.com,graham.barr@tiuk.ti.com
+Bcc: gbarr@ti.com,graham.barr@tiuk.ti.com
 Newsgroups:
 In-Reply-To:
 References:
-Reply-To: <bodg@tiuk.ti.com>
-Return-Path: <bodg@tiuk.ti.com>
-From: Graham Barr <bodg@tiuk.ti.com>
+Reply-To: <gbarr@ti.com>
+Return-Path: <gbarr@ti.com>
+From: Graham Barr <gbarr@ti.com>
 Organization: Texas Instruments Ltd. - via, but not speaking for
 Subject:
 --%<----%<----%<----%<----%<----%<----%<--
@@ -37,7 +37,7 @@ Subject:
 Any addresses that are included on the Bcc line above will be excluded from
 appearing on either the To or Cc lines.
 
-bodg@tiuk.ti.com,graham.barr@tiuk.ti.com are both message ids for myself
+gbarr@ti.com,graham.barr@tiuk.ti.com are both message ids for myself
 
 forwd_demo:
 

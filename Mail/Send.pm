@@ -47,14 +47,14 @@ Mail::Mailer
 =head1 AUTHORS
 
 Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
-<bodg@tiuk.ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
+<gbarr@ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
 For support please contact comp.lang.perl.misc.
 
 =cut
 
 use vars qw($VERSION);
 
-$VERSION = "1.04";
+$VERSION = do { my @r=(q$Revision: 1.6 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
 sub Version { $VERSION }
 
 sub new {

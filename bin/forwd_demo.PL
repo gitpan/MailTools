@@ -1,5 +1,5 @@
 # This -*- perl -*- script makes the forwd_demo script
-# $Id: forwd_demo.PL,v 1.2 1995/11/21 08:20:16 gbarr Exp $
+# $Id: forwd_demo.PL,v 1.2 1997/01/16 20:43:34 gbarr Exp $
 
 $script = "bin/forwd_demo";
 

@@ -1,7 +1,7 @@
 # Mail::Header.pm
 #
-# Copyright (c) 1995 Graham Barr <Graham.Barr@tiuk.ti.com>. All rights
-# reserved. This program is free software; you can redistribute it and/or
+# Copyright (c) 1995 Graham Barr <gbarr@ti.com>. All rights reserved.
+# This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
 #
@@ -194,7 +194,7 @@ multiple lines. IF C<TAG> is not given then all lines are unfolded.
 
 =head1 AUTHOR
 
-Graham Barr <Graham.Barr@tiuk.ti.com>
+Graham Barr <gbarr@ti.com>
 
 =head1 COPYRIGHT
 
@@ -209,7 +209,7 @@ require 5.002;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.06";
+$VERSION = do { my @r=(q$Revision: 1.9 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -284,6 +284,8 @@ sub _fold_line
  $_[0] =~ s/\s*[\r\n]+\s*/ /og; # Compress any white space around a newline
  $_[0] =~ s/\s*\Z/\n/so;        # End line with a EOLN
 
+ return if $_[0] =~ /^From\s/io;
+
  if(length($_[0]) > $ml)
   {
    #Split the line up
@@ -291,8 +293,9 @@ sub _fold_line
    # next split a whitespace
    # else we are looking at a single word and probably don't want to split
 
-   $_[0] =~ s/\s*(.{$min,$max}?[\,\;]|.{1,$max}[\s\n]|\S+[\s\n])/\n    $1/g;
+   $_[0] =~ s/\s*(.{$min,$max}?[\,\;]|.{1,$max}[\s\n]|\S+[\s\n])/\n    $1/sg;
    $_[0] =~ s/(\A\s+|[\t ]+\Z)//sog;
+   $_[0] =~ s/\s+\n/\n/sog;
   }
 
  $_[0] =~ s/\A(\S+\s)[\s\n]*/$1/so; 
@@ -542,8 +545,8 @@ sub unfold
    $list = $me->{'mail_hdr_hash'}{$tag};
    foreach $ln (@$list)
     {
-     $ln =~ s/\r?\n\s+/ /sog
-	if defined $ln;
+     $$ln =~ s/\r?\n\s+/ /sog
+	if defined $ln && defined $$ln;
     }
   }
  else
@@ -552,8 +555,8 @@ sub unfold
     {
      foreach $ln (@$list)
       {
-       $ln =~ s/\r?\n\s+/ /sog
-	    if defined $ln;
+       $$ln =~ s/\r?\n\s+/ /sog
+	if defined $ln && defined $$ln;
       }
     }
   }

@@ -1,5 +1,5 @@
 # This -*- perl -*- script makes the rplyto_demo script
-# $Id: rplyto_demo.PL,v 1.2 1995/11/21 08:20:16 gbarr Exp $
+# $Id: rplyto_demo.PL,v 1.2 1997/01/16 20:43:35 gbarr Exp $
 
 $script = "bin/rplyto_demo";
 

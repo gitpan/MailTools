@@ -1,6 +1,6 @@
 # Mail::Util.pm
 #
-# Copyright (c) 1995 Graham Barr <bodg@tiuk.ti.com>. All rights reserved.
+# Copyright (c) 1995 Graham Barr <gbarr@ti.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -9,7 +9,7 @@ use strict;
 
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = "1.10";
+$VERSION = do { my @r=(q$Revision: 1.12 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
 sub Version { $VERSION }
 
 =head1 NAME
@@ -48,7 +48,7 @@ the return value by setting C<$ENV{MAILADDRESS}>
 
 =head1 AUTHOR
 
-Graham Barr <bodg@tiuk.ti.com>
+Graham Barr <gbarr@ti.com>
 
 =head1 COPYRIGHT
 
