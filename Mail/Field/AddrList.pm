@@ -38,6 +38,7 @@ To, From, Cc, Reply-To and Sender.
 
 Peter Orbaek <poe@cit.dk> 26-Feb-97
 Modified by Graham Barr <gbarr@pobox.com>
+Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =cut
 

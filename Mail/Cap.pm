@@ -1,4 +1,3 @@
-#
 
 package Mail::Cap;
 use strict;
@@ -330,7 +329,9 @@ modify it under the same terms as Perl itself.
 
 Gisle Aas <aas@oslonett.no> 
 
-Maintained by Graham Barr <gbarr@pobox.com>
+Modified by Graham Barr <gbarr@pobox.com>
+
+Maintained by Mark Overmeer <mailtools@overmeer.net>
 
 =cut
 
