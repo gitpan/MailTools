@@ -1,6 +1,18 @@
 
-version:
-	by <mailtools@overmeer.net> (Mark Overmeer)
+version 1.40: Fri Aug 24 20:15:30 CEST 2001
+
+	- mailaddress defaults to username, not gcos in Mail/Util.pm
+	  Patched by [Vivek Khera]
+
+	- Increased all version-numbers to show that maintainer-address
+	  did change.   Suggested by [Tassilo v Parseval]
+
+	  All packages in this bundle with have the same version!!!
+	  The highest number used was 1.33.
+
+
+version 1.16: Wed Aug  8 11:28:26 CEST 2001
+	by Mark Overmeer <mailtools@overmeer.net>
 
 	From now on MailTools will be maintained by Mark Overmeer
 	<mailtools@overmeer.net>

@@ -16,7 +16,7 @@ use Mail::Header;
 use vars qw($VERSION);
 
 BEGIN {
-    $VERSION = "1.33";
+    $VERSION = "1.40";
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
 
     unless(defined &UNIVERSAL::isa) {
@@ -549,7 +549,7 @@ sub _prephdr {
 
     my $tag;
 
-    foreach $tag (qw(From Sender)) {
+    foreach $tag (qw(From Sender)) {  # Sender is deprecated
 	$hdr->add($tag,$from)
 	    unless($hdr->get($tag));
     }

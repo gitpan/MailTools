@@ -14,7 +14,7 @@ use Exporter ();
 BEGIN {
     require 5.000;
 
-    $VERSION = "1.16";
+    $VERSION = "1.40";
 
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
     @ISA = qw(Exporter);
@@ -224,9 +224,9 @@ sub mailaddress {
 	$mailaddress = $InternetConfig{kICEmail()};
     }
 
-    $mailaddress ||= $ENV{USER} ||
+    $mailaddress ||= $ENV{USER}    ||
                      $ENV{LOGNAME} ||
-                     eval { (getpwuid($>))[6] } ||
+                     getpwuid($>)  ||
                      "postmaster";
 
     ##

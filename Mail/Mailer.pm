@@ -124,7 +124,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.22";
+$VERSION = "1.40";
 
 sub Version { $VERSION }
 
