@@ -1,18 +1,27 @@
- o  Removed Mail::MIME as it is now redundant.
+Tue Jan 07 1996
+
+ o Release 1.08
+ o fixed Mail::Mailer::new so that it uses Symbol properly
+   to generate the anonymous glob.
+
+Thu Jan 02 1996   Graham Barr <bodg@tiuk.ti.com>
+
+ o Release 1.07
+ o Removed Mail::MIME as it is now redundant.
 	See $CPAN/authors/id/ERYQ/MIME-tools-x.xx for MIME related modules
- o  Attempt to make Mail::Mailer find the correct mail program to invoke
- o  Added Mail::Internet::unescape_from at the request of <kjj@primenet.com>
- o  Fixed a bug in _fmt_line, was appling a s/// to a ref ???, now de-ref
- o  Added Mail::Internet::escape_from at the request of <kjj@primenet.com>
- o  Modified Mail::Internet::new so that it no longer accepts the message
-    as an array. It now accepts an arg and key-value aoptions
- o  Fixed a mis-spelling of Received in Internet.pm
- o  Fixed a problem in Header.pm when return-ing line text and tag == 'From '
-    length($tag) + 2 is incorrect
+ o Attempt to make Mail::Mailer find the correct mail program to invoke
+ o Added Mail::Internet::unescape_from at the request of <kjj@primenet.com>
+ o Fixed a bug in _fmt_line, was appling a s/// to a ref ???, now de-ref
+ o Added Mail::Internet::escape_from at the request of <kjj@primenet.com>
+ o Modified Mail::Internet::new so that it no longer accepts the message
+   as an array. It now accepts an arg and key-value aoptions
+ o Fixed a mis-spelling of Received in Internet.pm
+ o Fixed a problem in Header.pm when return-ing line text and tag == 'From '
+   length($tag) + 2 is incorrect
 
 Wed Jul 24 1996   Graham Barr <bodg@tiuk.ti.com>
 
- o  Mail::Send, MAil::Mailer Incorporated a patch from Nathan Torkington
+ o  Mail::Send, Mail::Mailer Incorporated a patch from Nathan Torkington
     <gnat@frii.com> to allow headers to be passed as scalars as well as
     list-refs. It also included some doc updates. Many thanks to Nathan
 

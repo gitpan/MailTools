@@ -88,7 +88,7 @@ use FileHandle;
 use Symbol;
 use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 
-$VERSION = "1.07";
+$VERSION = "1.08";
 sub Version { $VERSION }
 
 @ISA = qw(FileHandle);
@@ -187,12 +187,13 @@ sub new {
 	unless $type;
 
     local($glob) = gensym;	# Make glob for FileHandle and attributes
+
     %{*$glob} = (Exe 	=> $exe,
 		 Args	=> [ @args ]
 		);
     
     $class = "Mail::Mailer::$type";
-    bless \$glob, $class;
+    bless $glob, $class;
 }
 
 

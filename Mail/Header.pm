@@ -711,7 +711,7 @@ sub combine
  my $with = shift || ' ';
  my $line;
 
- return _error "unadorned 'From ' ignored: <$line>"
+ return _error "unadorned 'From ' ignored"
 	if($tag =~ /^From /io && $me->{'mail_hdr_mail_from'} ne 'KEEP');
 
  return undef
@@ -725,14 +725,13 @@ sub combine
 
    map { $$_ = undef } @{$me->{'mail_hdr_hash'}{$tag}};
 
-   ${$me->{'mail_hdr_hash'}{$tag}[0]} = 
+   $line = ${$me->{'mail_hdr_hash'}{$tag}[0]} = 
         (_fmt_line($me,$tag, join($with,@lines),1))[1];
 
    _tidy_header($me);
   }
 
- $line =~ /^\S+\s*/o;
- return $';		# post-match
+ return $line;		# post-match
 }
 
 sub get
