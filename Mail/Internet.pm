@@ -1,6 +1,6 @@
 # Mail::Internet.pm
 #
-# Copyright (c) 1995-7 Graham Barr <gbarr@pobox.com>. All rights
+# Copyright (c) 1995-8 Graham Barr <gbarr@pobox.com>. All rights
 # reserved. This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -766,11 +766,12 @@ Debug value to pass to Net::NNTP, see <Net::NNTP>
 
 It can cause problems with some applications if a message contains a line
 starting with C<`From '>, in particular when attempting to split a folder.
-This method inserts a leading C<`>'> on anyline starting with C<`From '>
+This method inserts a leading C<`>'> on anyline that matches the regular
+expression C</^>*From/>
 
 =item unescape_from ()
 
-This method will remove the escaping added bu escape_from
+This method will remove the escaping added by escape_from
 
 =back
 

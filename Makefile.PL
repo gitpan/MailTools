@@ -5,7 +5,7 @@
 
 $NAME     = 'Mail';
 $DISTNAME = "MailTools";
-$VERSION  = "1.10";
+$VERSION  = "1.11";
 
 BEGIN { require 5.001 }
 
@@ -23,7 +23,8 @@ sub MY::libscan
 	   $path =~ m:[~%]$: ||
 	   $path =~ m:\.(orig|rej|nfs)$:
 	  );
- 
+ return ''
+	if $] < 5.004 and $path =~ m:/Mail/Field:;
  $path;
 }
 
@@ -58,6 +59,17 @@ chk_version(Net::Domain => 1.05) or
     warn  "\n"
 	. "It is reccomended that you have Net::Domain version 1.05 or later\n"
 	. "Look on CPAN for CPAN/modules/by-author/id/GBARR/libnet-x.x.tar.gz\n\n";
+
+chk_version(IO::Handle => 0.00) or
+    warn  "\n"
+	. "To be able to use Mail::Mailer and Mail::Send you will need to\n"
+	. "install the IO distribution.\n"
+	. "Look on CPAN for CPAN/modules/by-author/id/GBARR/IO-x.x.tar.gz\n\n";
+
+warn "\n"
+   . "Mail::Field will not be installed as it requires perl 5.004 or later\n"
+   . "and you only have $]\n\n"
+	if $] < 5.004;
 
 #--- Write the Makefile
 

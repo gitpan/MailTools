@@ -1,3 +1,26 @@
+*** Release 1.11
+
+Fri Jan  2 1998 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Internet
+	- Documentation updates
+	
+	Mail::Util
+	- Fixed "Use of inherited AUTOLOAD" warning
+	
+	Mail::Mailer
+	- Some version of mail do not like STDIN bot being a terminal
+	  and also print 'EOT' to stdout when done. Opened STDOUT/ERR to
+	  /dev/null
+	
+	Makefile.PL
+	- Changed so that Mail::Field is not installed if perl version is less
+	  than 5.004
+
+	Mail::Mailer
+	- removed all for(my $i ...) and foreach my $d as they break
+	  compatability with pre perl5.004
+
 Tue Nov 25 1997 <gbarr@pobox.com> (Graham Barr)
 
 	Mail::Mailer

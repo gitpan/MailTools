@@ -9,7 +9,23 @@ use strict;
 
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = "1.13";
+use AutoLoader ();
+use Exporter ();
+use Carp;
+
+BEGIN {
+    require 5.000;
+
+    $VERSION = "1.14";
+
+    *AUTOLOAD = \&AutoLoader::AUTOLOAD;
+    @ISA = qw(Exporter AutoLoader);
+
+    @EXPORT_OK = qw(read_mbox maildomain mailaddress smtpsend);
+}
+
+1;
+
 sub Version { $VERSION }
 
 =head1 NAME
@@ -52,22 +68,11 @@ Graham Barr <gbarr@pobox.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-7 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1995-8 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 
 =cut
-
-require 5.000;
-use AutoLoader;
-require Exporter;
-use Carp;
-
-@ISA = qw(Exporter AutoLoader);
-
-@EXPORT_OK = qw(read_mbox maildomain mailaddress smtpsend);
-
-1;
 
 __END__
 

@@ -6,7 +6,7 @@ require Mail::Alias;
 print "ok 2\n";
 require Mail::Cap;
 print "ok 3\n";
-require Mail::Field;
+require Mail::Field if $] >= 5.004;
 print "ok 4\n";
 require Mail::Header;
 print "ok 5\n";

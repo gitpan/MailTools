@@ -11,6 +11,16 @@ use strict;
 
 Mail::Address - Parse mail addresses
 
+=head1 SYNOPSIS
+
+    use Mail::Address;
+    
+    my @addrs = Mail::Address->parse($line);
+    
+    foreach $addr (@addrs) {
+	print $addr->format,"\n";
+    }
+
 =head1 DESCRIPTION
 
 C<Mail::Address> extracts and manipulates RFC822 compilant email

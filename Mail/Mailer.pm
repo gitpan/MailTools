@@ -114,7 +114,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.14"; # $Id: //depot/MailTools/Mail/Mailer.pm#5$
+$VERSION = "1.15"; # $Id: //depot/MailTools/Mail/Mailer.pm#9$
 
 sub Version { $VERSION }
 
@@ -156,12 +156,15 @@ $MailerBinary = undef;
 
 # does this really need to be done? or should a default mailer be specfied?
 
-for(my $i = 0 ; $i < @Mailers ; $i += 2) {
-    $MailerType = $Mailers[$i];
-    my $binary;
-    if($binary = is_exe($Mailers{$MailerType})) {
-	$MailerBinary = $binary;
-	last;
+{
+    my $i;
+    for($i = 0 ; $i < @Mailers ; $i += 2) {
+	$MailerType = $Mailers[$i];
+	my $binary;
+	if($binary = is_exe($Mailers{$MailerType})) {
+	    $MailerBinary = $binary;
+	    last;
+	}
     }
 }
 
@@ -191,8 +194,9 @@ sub to_array {
 
 sub is_exe {
     my $exe = shift;
+    my $cmd;
 
-    foreach my $cmd (split /;/, $exe) {
+    foreach $cmd (split /;/, $exe) {
 	$cmd =~ s/^\s+//;
 
 	# remove any options
@@ -202,7 +206,8 @@ sub is_exe {
 	return ($cmd)
 	    if (-x $name and ! -d $name and $name =~ m:/:);
 
-	foreach my $dir (split(/:/, $ENV{PATH})) {
+	my $dir;
+	foreach $dir (split(/:/, $ENV{PATH})) {
 	    return "$dir/$cmd"
 		if (-x "$dir/$name" && ! -d "$dir/$name");
 	}
@@ -347,6 +352,12 @@ sub set_headers {
 	print $self join(" ",$v, $self->to_array($hdrs->{$k})), "\n"
 		if defined $hdrs->{$k};
     }
+}
+
+sub exec {
+    open(STDOUT,">/dev/null"); # this is not portable !!!!
+    open(STDERR,">/dev/null"); # this is not portable !!!!
+    shift->SUPER::exec(@_);
 }
 
 ##

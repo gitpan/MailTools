@@ -12,6 +12,16 @@ sub Version { $VERSION; }
 
 Mail::Cap - Parse mailcap files
 
+=head1 SYNOPSIS
+
+    my $mc = new Mail::Cap;
+
+    $desc = $mc->description('image/gif');
+
+    print "GIF desc: $desc\n";
+
+    $cmd = $mc->viewCmd('text/plain; charset=iso-8859-1', 'file.txt');
+
 =head1 DESCRIPTION
 
 Parse mailcap files as specified in RFC 1524 - I<A User Agent
