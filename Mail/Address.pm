@@ -15,10 +15,66 @@ Mail::Address - Parse mail addresses
 Parse mailcap files as specified in RFC 822 - I<Standard for ARPA Internet
 Text Messages>.
 
+=head1 CONSTRUCTORS
+
+=head2 new($phrase, $address, [ $comment])
+
+ Mail::Address->new("Perl5 Porters", "perl5-porters@africa.nicoh.com");
+
+Create a new object which represent an address with the elements given. In
+a message these 3 elements would be seen like:
+
+ $phrase <$address> ($comment)
+ $address ($comment)
+
+=head2 parse($line)
+
+ Mail::Address->parse($line);
+
+ Parse the given line a return a list of extracted objects. The line would
+ normally be one taken from a To,Cc or Bcc line in a message
+
+=head1 METHODS
+
+=head2 phrase()
+
+=head2 address()
+
+=head2 comment()
+
+These methods each return one part of the object
+
+=head2 format()
+
+Return a string representing the address in a suitable form to be placed
+on a To,Cc or Bcc line of a message
+
+=head2 name()
+
+Using the information contained within the object attempt to identify what
+the perons or groups name is
+
+=head2 host()
+
+Return the address excluding the user id and '@'
+
+=head2 host()
+
+Return the address excluding the '@' and the mail domain
+
+=head2 path()
+
+Unimplemented yet but shoud return the UUCP path for the message
+
+=head2 canon()
+
+Unimplemented yet but shoud return the UUCP canon for the message
+
 =cut
 
+use Carp;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.6 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.8 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 #
@@ -47,37 +103,45 @@ sub _tokenise {
  s/\A\s+//;
  s/[\r\n]+/ /g;
 
- while ($_ ne '') {
-  $field = '';
-  if(/^\s*\(/) {   # (...)
-   my $depth = 0;
+ while ($_ ne '')
+  {
+   $field = '';
+   if( /^\s*\(/ )    # (...)
+    {
+     my $depth = 0;
 
-   while(s/^\s*(\(([^\(\)\\]|\\.)*)//) {
-    $field .= $1;
-    $depth++;
-    while($depth && s/^(([^\(\)\\]|\\.)*\)\s*)//) {
-     $depth--;
-     $field .= $1;
+     while(s/^\s*(\(([^\(\)\\]|\\.)*)//)
+      {
+       $field .= $1;
+       $depth++;
+       while($depth && s/^(([^\(\)\\]|\\.)*\)\s*)//)
+        {
+         $depth--;
+         $field .= $1;
+        }
+      }
+
+     carp "Unmatched () '$field' '$_'"
+        if $depth;
+
+     $field =~ s/\s+\Z//;
+     push(@words, $field);
+
+     next;
     }
-   }
-  warn "Unmatched () '$field' '$_'\n" if($depth);
-  $field =~ s/\s+\Z//;
-  push(@words, $field);
-  next;
- }
 
-     s/^("([^"\\]|\\.)*")\s*//       # "..."
-  || s/^(\[([^\]\\]|\\.)*\])\s*//    # [...]
-  || s/^([^\s\Q()<>\@,;:\\".[]\E]+)\s*//
-  || s/^([\Q()<>\@,;:\\".[]\E])\s*//
-    and do { push(@words, $1); next; };
+      s/^("([^"\\]|\\.)*")\s*//       # "..."
+   || s/^(\[([^\]\\]|\\.)*\])\s*//    # [...]
+   || s/^([^\s\Q()<>\@,;:\\".[]\E]+)\s*//
+   || s/^([\Q()<>\@,;:\\".[]\E])\s*//
+     and do { push(@words, $1); next; };
 
-  die "Unrecognised line: $_\n";
- }
+   croak "Unrecognised line: $_";
+  }
 
  push(@words, ",");
 
- return wantarray ? @words : \@words;
+ \@words;
 }
 
 sub _find_next {
@@ -111,19 +175,6 @@ sub _complete {
  return $o;
 }
 
-=head1 CONSTRUCTORS
-
-=head2 new($phrase, $address, [ $comment])
-
- Mail::Address->new("Perl5 Porters", "perl5-porters@africa.nicoh.com");
-
-Create a new object which represent an address with the elements given. In
-a message these 3 elements would be seen like:
-
- $phrase <$address> ($comment)
- $address ($comment)
-
-=cut
 
 sub new {
  my $pkg = shift;
@@ -131,19 +182,12 @@ sub new {
  return $me;
 }
 
-=head2 parse($line)
-
- Mail::Address->parse($line);
-
- Parse the given line a return a list of extracted objects. The line would
- normally be one taken from a To,Cc or Bcc line in a message
-
-=cut
 
 sub parse {
  my $pkg = shift;
 
- local($_);
+ local $_;
+
  my @phrase  = ();
  my @comment = ();
  my @address = ();
@@ -209,28 +253,11 @@ sub set_or_get {
  $val;
 }
 
-=head1 METHODS
-
-=head2 phrase()
-
-=head2 address()
-
-=head2 comment()
-
-These methods each return one part of the object
-
-=cut
 
 sub phrase  { set_or_get(shift,0,@_) }
 sub address { set_or_get(shift,1,@_) }
 sub comment { set_or_get(shift,2,@_) }
 
-=head2 format()
-
-Return a string representing the address in a suitable form to be placed
-on a To,Cc or Bcc line of a message
-
-=cut
 
 sub format {
  my @fmts = ();
@@ -254,12 +281,6 @@ sub format {
  return join(", ", @fmts);
 }
 
-=head2 name()
-
-Using the information contained within the object attempt to identify what
-the perons or groups name is
-
-=cut
 
 sub name {
  my $me = shift;
@@ -299,11 +320,6 @@ sub name {
  return length($name) ? $name : undef;
 }
 
-=head2 host()
-
-Return the address excluding the user id and '@'
-
-=cut
 
 sub host {
  my $me = shift;
@@ -315,37 +331,22 @@ sub host {
  return $host;
 }
 
-=head2 host()
-
-Return the address excluding the '@' and the mail domain
-
-=cut
 
 sub user {
  my $me = shift;
  my $addr = $me->address;
  my $i = index($addr,'@');
 
- my $user = ($i >= 0) ? substr($addr,0,$i) : undef;
+ my $user = ($i >= 0) ? substr($addr,0,$i) : $addr;
 
  return $user;
 }
 
-=head2 path()
-
-Unimplemented yet but shoud return the UUCP path for the message
-
-=cut
 
 sub path {
  return ();
 }
 
-=head2 canon()
-
-Unimplemented yet but shoud return the UUCP canon for the message
-
-=cut
 
 sub canon {
  my $me = shift;
@@ -353,4 +354,5 @@ sub canon {
 }
 
 1;
+
 

@@ -10,8 +10,12 @@ require Mail::Internet;
 
 @ISA = qw(Mail::Internet);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
+
+=head1 NAME
+
+Mail::MIME - manipulate MIME (RFC 1521) mail messages
 
 =head1 SYNOPSIS
 

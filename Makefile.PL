@@ -1,120 +1,168 @@
 # This -*- perl -*- script makes the Makefile
-# $Id: Makefile.PL,v 1.4 1995/11/21 08:47:51 gbarr Exp $
-
-use ExtUtils::MakeMaker;
-use ExtUtils::Manifest qw(maniread);
+# $Id: Makefile.PL,v 1.5 1996/08/13 09:28:13 gbarr Exp $
 
 #--- Configuration section ---
+
+%install_pgm = ();
 
 #--- End User Configuration - You should not have to change anything below this line
 
 require 5.001;
 
-$VERSION  = "1.04";
+$VERSION = "1.06";
 $NAME     = 'Mail';
 $DISTNAME = 'MailTools';
+$RELTYPE  = "";
 
-%chk_install =  (Net::SMTP   => [1.03, 0],
-		 Net::Domain => [1.05, 0]
-		);
+$lib_only    = 0;
 
 #--- End Configuration
 
-sub check_installation {
- my %pkg = @_;
- my $abort = 0;
- my $pkg;
+use FileHandle;
+use ExtUtils::MakeMaker;
+use ExtUtils::Manifest qw(maniread);
 
- print "Checking your installation ...\n";
+#--- MY package
 
- foreach $pkg (keys %pkg) 
-  {
-   { eval "package dummy; require $pkg"; }
+sub MY::libscan
+{
+ my($self,$path) = @_;
 
-   my $ins_ver;
-   my($version,$must) = @{$pkg{$pkg}};
-   $version = sprintf("%.02f",$version);
-
-   $ins_ver = defined ${$pkg . "::VERSION"}
-                ? sprintf("%.02f",${$pkg . "::VERSION"})
-                : undef;
-
-   printf " %s %s, ",$pkg, (defined $ins_ver ? "Found v" . $ins_ver
-                                             : "NOT FOUND");
-
-   $ins_ver = "0.00" unless(defined $ins_ver);
-
-   if($ins_ver < $version)
-    {
-     $abort += $must;
-     printf "%s v%s\n", $must ? "REQUIRE " : "Recommend ", $version;
-    }
-   else
-    {
-     print "OK\n";
-    }
-  }
-
- die "Abort\n" if $abort;
-
- print "Done.\n";
+ return '' 
+	if($path =~ m:/(RCS|CVS|SCCS)/: ||
+	   $path =~ m:[~%]$: ||
+	   $path =~ m:\.(orig|rej)$:
+	  );
+ 
+ $path;
 }
 
-sub initialize {
- local($_);
+#--- End MY package
 
- check_installation(%chk_install);
-
+sub doIt
+{
  my $manifest = maniread();
+ 
+ my %PL_FILES = ();
+ my %EXE_FILES = ();
+ my %macro = ();
 
- my %pl_files = ();
- my @exe_files = ();
-
+ #--- Install what ?
+ 
  foreach (keys %$manifest) {
-  $pl_files{$_} = $1 if(/(.*)\.PL\Z/ && !/^Makefile.PL$/);
-  push(@exe_files,$_) if(m#\bbin/# && !m#demo#);
+  $PL_FILES{$_} = $1 if(/(.*)\.PL\Z/ && !/^Makefile.PL$/);
+ 
+  if(m#\bbin/# && !m#demo#) {
+   my $f = $_;
+ 
+   $f =~ s#\.PL$##;
+ 
+   if(defined $install_pgm{$f} && $install_pgm{$f}) {
+    $EXE_FILES{$f} = 1 if(-x $f || -f "$f.PL");
+   }
+  }
  }
-
+ 
+ %EXE_FILES = () if($lib_only);
+ 
+ #--- Dist. VERSION
+ 
+ unless(defined $VERSION)
+  {
+   my($pm,$rcs);
+   my $fh = new FileHandle;
+  
+   ($pm = $NAME . ".pm") =~ s,.*::,,;
+   ($pm = $NAME . ".pm") =~ s,::,/,g unless(-f $pm);
+   $pm = "lib/" . $pm unless(-f $pm);
+  
+   if($fh->open($pm))
+    {
+     while (<$fh>)
+      {
+       chomp;
+       next unless /\$([\w:]*\bVERSION)\b.*=/;
+       my $module_version_variable = $1;
+       my($eval) = "$_;";
+       eval $eval;
+       die "Could not eval '$eval': $@" if $@;
+       $VERSION = $ {$module_version_variable};
+       last;
+      }
+     close $fh;
+    }
+  
+   ($rcs = $pm) =~ s:([^/]+\.pm):RCS/$1,v:;
+  
+   # update VERSION when checked in
+   $macro{CONFIGDEP} = $rcs
+     if(-f $rcs);
+  }
+ 
+ $VERSION .= $RELTYPE
+ 	if(defined $RELTYPE);
+ 
+ #--- Write the Makefile
+ 
  %hash = (
 	VERSION   => $VERSION,
 	NAME      => $NAME,
-	DISTNAME  => $DISTNAME,
-	SKIP      => [qw(static dynamic)],
-	PL_FILES  => \%pl_files,
-	EXE_FILES => \@exe_files,
-	dist      => {COMPRESS     => 'gzip -9f',
-		      SUFFIX       => 'gz',
+	PL_FILES  => \%PL_FILES,
+	EXE_FILES => [ keys %EXE_FILES ],
+ 
+	'linkext' => {LINKTYPE => '' },
+	'dist'    => {COMPRESS => 'gzip -9f',
+		      SUFFIX   => 'gz', 
+		      POSTOP   => 'mv $(DISTNAME)-$(VERSION).tar.gz ../',
 		      DIST_DEFAULT => 'all tardist',
-		      CI           => 'ci -l'
+		      CI => 'ci -l'
 		     },
-	linkext   => {LINKTYPE => ''},
-	clean     => {FILES => '*% *.html *.bak *.old lib/*% lib/*/*% $(EXE_FILES)'},
+ 
+	'clean'   => {FILES => join(" ", qw(*% *.html *.bak *.old lib/*% lib/*/*%),values %PL_FILES)},
  );
-
- \%hash;
+ 
+ $hash{macro} = \%macro
+ 	if(%macro);
+ 
+ $hash{DISTNAME} = $DISTNAME
+ 	if(defined $DISTNAME);
+ 
+ WriteMakefile( %hash ) ;
+ 
 }
 
-sub MY::test {
-    q{
-TEST_VERBOSE=0
+#--- Installation check
 
-test:
-	$(FULLPERL) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use Test::Harness qw(&runtests $$verbose); $$verbose=$(TEST_VERBOSE); runtests @ARGV;' t/*.t
+sub chk_version
+{
+ my($pkg,$wanted,$msg) = @_;
 
-};
+ $| = 1;
+ print "Checking for $pkg...";
+
+ eval "require $pkg";
+
+ my $vstr = ${"${pkg}::VERSION"} ? "found v" . ${"${pkg}::VERSION"}
+				 : "not found";
+ my $vnum = ${"${pkg}::VERSION"} || 0;
+
+ print $vnum >= $wanted ? "ok\n" : " " . $vstr . "\n";
+
+ $vnum >= $wanted;
 }
 
-sub MY::libscan {
-    return '' if m:/(RCS|CVS)/:;
-    return '' if m/[~%]$/;
-    return '' if m/\.(orig|rej)$/;
-    $_;
-}
+#--- Check for Socket
 
-# -- Make the Makefile
+chk_version(Net::SMTP => 1.03) or
+    warn  "\n"
+	. "It is reccomended that you have Net::SMTP version 1.03 or later\n"
+	. "Look on CPAN for CPAN/modules/by-author/id/GBARR/Net-FTP-x.x.tar.gz\n\n";
 
-die "You require MakeMaker v4.17 or later to install this package\n"
-   unless($ExtUtils::MakeMaker::Version >= 4.17);
+chk_version(Net::Domain => 1.05) or
+    warn  "\n"
+	. "It is reccomended that you have Net::Domain version 1.05 or later\n"
+	. "Look on CPAN for CPAN/modules/by-author/id/GBARR/Net-Domain-x.x.tar.gz\n\n";
 
-WriteMakefile(CONFIGURE => \&initialize);
+#--- Write the Makefile
 
+doIt();

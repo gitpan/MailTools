@@ -12,7 +12,7 @@ Mail::Mailer - Simple interface to electronic mailing mechanisms
 
     $mailer = new Mail::Mailer;
 
-    $mailer = new Mail::Mailer $command, $type;
+    $mailer = new Mail::Mailer $type, @args;
 
     $mailer->open(\%headers);
 
@@ -23,7 +23,45 @@ Mail::Mailer - Simple interface to electronic mailing mechanisms
 
 =head1 DESCRIPTION
 
-$Revision: 1.5 $
+Sends mail using any of the built-in methods.  You can alter the
+behaviour of a method by passing C<$command> to the C<new> method.
+
+=over 4
+
+=item C<sendmail>
+
+Use the C<sendmail> program to deliver the mail.  C<$command> is the
+path to C<sendmail>.
+
+=item C<mail>
+
+Use the Unix system C<mail> program to deliver the mail.  C<$command>
+is the path to C<mail>.
+
+=item C<telnet>
+
+Telnet to the SMTP port of the local machine.  C<$command> is the path
+to the C<telnet> command.  C<$Mail::Mailer> calls C<$command localhost
+smtp>.
+
+=item C<test>
+
+Used for debugging, this calls C</bin/echo> to display the data.  No
+mail is ever sent.  C<$command> is ignored.
+
+=back
+
+=head2 ARGUMENTS
+
+C<new> can optionally be given a C<$command> and C<$type>.  C<$type>
+is one C<sendmail>, C<mail>, ... given above.  The meaning of
+C<$command> depends on C<$type>.
+
+C<open> is given a reference to a hash.  The hash consists of key and
+value pairs, the key being the name of the header field (eg, C<To>),
+and the value being the corresponding contents of the header field.
+The value can either be a scalar (eg, C<gnat@frii.com>) or a reference
+to an array of scalars (C<eg, [gnat@frii.com, Tim.Bunce@ig.co.uk]>).
 
 =head1 TO DO
 
@@ -40,36 +78,65 @@ Mail::Send
 =head1 AUTHORS
 
 Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
-<bodg@tiuk.ti.com>. For support please contact comp.lang.perl.misc.
+<bodg@tiuk.ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
+For support please contact comp.lang.perl.misc.
+Small fix and documentation by Nathan Torkington <gnat@frii.com>.
+
+=head1 REVISION
+
+$Revision: 1.7 $
+
+The VERSION is derived from the revision turning each number after the
+first dot into a 2 digit number so
+
+	Revision 1.8   => VERSION 1.08
+	Revision 1.2.3 => VERSION 1.0203
 
 =cut
 
 use Carp;
 use FileHandle;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 @ISA = qw(FileHandle);
 
+# Suggested binaries for types?  Should this be handled in the object class?
 @Mailers = (
-    '/usr/lib/sendmail'	=> 'sendmail',	# Headers-blank-Body all on stdin
-    'mail'		=> 'mail',	# Body on stdin with tilde escapes
-    'telnet'		=> 'smtp',
-    'test'		=> 'test',
+    'mail'	=> 	'mail',			# Body on stdin with tilde escapes
+    'sendmail'	=>	'/usr/lib/sendmail',	# Headers-blank-Body all on stdin
+    'smtp'	=> 	'telnet',
+    'test'	=> 	'test'
 );
+
 push(@Mailers, split(/:/,$ENV{PERL_MAILERS})) if $ENV{PERL_MAILERS};
 %Mailers = @Mailers;
 
 $MailerBinary = undef;
 $gensym = "SYM000";
 
-foreach( 0..@Mailers ) {
-    next if $_ % 2;
-    my $binary = $Mailers[$_];
-    if (is_exe($binary)) {
+# On solaris mail does not except ~ escapes, you must use mailx
+
+$Mailers{mail} = 'mailx'
+	if(is_exe('mailx'));
+
+# does this really need to be done? or should a default mailer be specfied?
+foreach $i ( 0..@Mailers ) {
+    next unless $i % 2;
+    $MailerType = $Mailers[$i];
+    if ($binary=is_exe($Mailers{$MailerType})) {
 	$MailerBinary = $binary;
 	last;
+    }
+}
+
+sub to_array {
+    my($self, $thing) = @_;
+    if (ref($thing)) {
+	return @$thing;
+    } else {
+	return ($thing);
     }
 }
 
@@ -85,24 +152,30 @@ sub is_exe {
     my $name = shift;
     my $dir;
     # check for absolute or relative path
-    return (-x $name && ! -d $name) if ($name =~ m:/:);
+    return ($name) if (-x $name and ! -d $name and $name =~ m:/:);
     foreach $dir (split(/:/, $ENV{PATH})) {
-	return 1 if (-x "$dir/$name" && ! -d "$dir/$name");
+	return "$dir/$name" if (-x "$dir/$name" && ! -d "$dir/$name");
     }
     0;
 }
 
 sub new {
-    my($class, $exe, $type, @args) = @_;
+    my($class, $type, @args) = @_;
+    my ($exe) = is_exe ($Mailers{$type});
 
     $exe  = $MailerBinary  unless $exe;
-    croak "No mailer program specified (and no default available)" unless $exe;
+    croak "No mailer type specified (and no default available), thus can not find executable program."
+	unless $exe;
 
-    $type = $Mailers{$exe} unless $type;
-    croak "Mailer '$exe' not known, please specify type" unless $type;
+    $type = $MailerType unless $type;
+    croak "Mailer '$type' not known, please specify correct type"
+	unless $type;
 
     local($glob) = &gensym;	# Make glob for FileHandle and attributes
-    %{*$glob} = (Exe => $exe);
+    %{*$glob} = (Exe 	=> $exe,
+		 Args	=> [ @args ]
+		);
+    
     $class = "Mail::Mailer::$type";
     bless \$glob, $class;
 }
@@ -111,12 +184,13 @@ sub new {
 sub open {
     my($self, $hdrs) = @_;
     my $exe = *$self->{Exe} || Carp::croak "$self->open: bad exe";
-    my @to  = $self->who_to($hdrs);
-
+    my $args = *$self->{Args};
+    my @to = $self->who_to($hdrs);
+    
     $self->close;	# just in case;
 
     # Fork and start a mailer
-    open($self,"|-") || $self->exec($exe, @to) || die $!;
+    open($self,"|-") || $self->exec($exe, $args, \@to) || die $!;
 
     # Set the headers
     $self->set_headers($hdrs);
@@ -127,19 +201,20 @@ sub open {
 
 
 sub exec {
-    my($self, $exe, @to) = @_;
+    my($self, $exe, $args, $to) = @_;
     # Fork and exec the mailer (no shell involved to avoid risks)
-    exec($exe, @to);
+    exec($exe, @$args, @$to);
 }
 
 sub can_cc { 1 }	# overridden in subclass for mailer that can't
 
 sub who_to {
     my($self, $hdrs) = @_;
-    my @to  = @{$hdrs->{To}};
+    my @to = $self->to_array($hdrs->{To});
+
     if (!$self->can_cc) {  # Can't cc/bcc so add them to @to
-	push(@to, @{$hdrs->{Cc}})  if $hdrs->{Cc};
-	push(@to, @{$hdrs->{Bcc}}) if $hdrs->{Bcc};
+	push(@to, $self->to_array($hdrs->{Cc})) if $hdrs->{Cc};
+	push(@to, $self->to_array($hdrs->{Bcc})) if $hdrs->{Bcc};
     }
     @to;
 }
@@ -163,8 +238,9 @@ sub DESTROY {
     ungensym($self);
 }
 
-
-
+##
+##
+##
 
 package Mail::Mailer::rfc822;
 @ISA = qw(Mail::Mailer);
@@ -175,33 +251,57 @@ sub set_headers {
     local($\)="";
     foreach(keys %$hdrs) {
 	next unless m/^[A-Z]/;
-	print $self "$_: @{$hdrs->{$_}}\n";
+	print $self "$_: ", join(",", $self->to_array($hdrs->{$_})), "\n";
     }
     print $self "\n";	# termitane headers
 }
 
+##
+##
+##
 
 package Mail::Mailer::sendmail;
 @ISA = qw(Mail::Mailer::rfc822);
 
 
+sub exec {
+    my($self, $exe, $args, $to) = @_;
+    # Fork and exec the mailer (no shell involved to avoid risks)
+
+    # We should always use a -t on sendmail so that Cc: and Bcc: work
+    #  Rumor: some sendmails may ignore or break with -t (AIX?)
+    exec(( $exe, '-t', @$args, @$to ));
+}
+
+##
+##
+##
+
 package Mail::Mailer::mail;
 @ISA = qw(Mail::Mailer);
+
+my %hdrs = qw(Cc ~c Bcc ~b Subject ~s);
 
 sub set_headers {
     my $self = shift;
     my $hdrs = shift;
-    print $self "~c @{$hdrs->{Cc}}\n"  if defined $hdrs->{Cc};
-    print $self "~b @{$hdrs->{Bcc}}\n" if defined $hdrs->{Bcc};
-    print $self "~s @{$hdrs->{Subject}}\n" if defined $hdrs->{Subject};
+    my($k,$v);
+
+    while(($k,$v) = each %hdrs) {
+	print $self join(" ",$v, $self->to_array($hdrs->{$k})), "\n"
+		if defined $hdrs->{$k};
+    }
 }
 
+##
+##
+##
 
 package Mail::Mailer::smtp;		# just for fun
 @ISA = qw(Mail::Mailer::rfc822);
 
 sub exec {
-    my($self, $exe, @to) = @_;
+    my($self, $exe, $args, $to) = @_;
     exec($exe, 'localhost', 'smtp');
 }
 
@@ -217,13 +317,19 @@ sub epilogue {
 
 }
 
+##
+##
+##
+
 package Mail::Mailer::test;
 @ISA = qw(Mail::Mailer::rfc822);
 
 sub can_cc { 0 }
 
 sub exec {
-    my($self, $exe, @to) = @_;
-    exec('sh', '-c', "echo to: @to; cat");
+    my($self, $exe, $args, $to) = @_;
+    exec('sh', '-c', "echo to: " . join(" ",@{$to}) . "; cat");
 }
+
+1;
 

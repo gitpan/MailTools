@@ -1,3 +1,9 @@
+Wed Jul 24 1996   Graham Barr <bodg@tiuk.ti.com>
+
+ o  Mail::Send, MAil::Mailer Incorporated a patch from Nathan Torkington
+    <gnat@frii.com> to allow headers to be passed as scalars as well as
+    list-refs. It also included some doc updates. Many thanks to Nathan
+
 Tue Nov 21 1995   Graham Barr <bodg@tiuk.ti.com>
 
  o  Added Mail::Internet::nntppost and Mail::Internet::smtpsend

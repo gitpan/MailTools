@@ -38,7 +38,7 @@ Mail::Send - Simple electronic mail interface
 
 =head1 DESCRIPTION
 
-$Revision: 1.3 $
+$Revision: 1.4 $
 
 =head1 SEE ALSO
 
@@ -47,11 +47,12 @@ Mail::Mailer
 =head1 AUTHORS
 
 Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
-<bodg@tiuk.ti.com>. For support please contact comp.lang.perl.misc.
+<bodg@tiuk.ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
+For support please contact comp.lang.perl.misc.
 
 =cut
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 sub new {
@@ -83,10 +84,10 @@ sub delete {
     delete $me->{$hdr};
 }
 
-sub to		{ my $me=shift; $me->set('To', @_); }
-sub cc		{ my $me=shift; $me->set('Cc', @_); }
-sub bcc		{ my $me=shift; $me->set('Bcc', @_); }
-sub subject	{ my $me=shift; $me->set('Subject', @_); }
+sub to		{ my $me=shift; $me->set('To', join (',', @_)); }
+sub cc		{ my $me=shift; $me->set('Cc', join (',', @_)); }
+sub bcc		{ my $me=shift; $me->set('Bcc', join (',', @_)); }
+sub subject	{ my $me=shift; $me->set('Subject', join (' ', @_)); }
 
 
 sub open {

@@ -6,9 +6,12 @@
 
 package Mail::Util;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.8 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.10 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
+=head1 NAME
+
+Mail::Util - mail utility functions
 
 =head1 SYNOPSIS
 
@@ -19,6 +22,40 @@ use Mail::Util qw( ... );
 This package provides several mail related utility functions. Any function
 required must by explicitly listed on the use line to be exported into
 the calling package.
+
+=head2 read_mbox( $file )
+
+Read C<$file>, a binmail mailbox file, and return a list of  references.
+Each reference is a reference to an array containg one message.
+
+=head2 maildomain()
+
+Attempt to determine the current uers mail domain string via the following
+methods
+
+ Look for a sendmail.cf file and extract DH parameter
+ Look for a smail config file and usr the first host defined in hostname(s)
+ Try an SMTP connect (if Net::SMTP exists) first to mailhost then localhost
+ Use value from Net::Domain::domainname (if Net::Domain exists)
+
+=head2 mailaddress()
+
+Return a guess at the current users mail address. The user can force
+the return value by setting C<$ENV{MAILADDRESS}>
+
+=head1 AUTHOR
+
+Graham Barr <bodg@tiuk.ti.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
+
+=head1 REVISION
+
+$Revision: 1.10 $
 
 =cut
 
@@ -37,12 +74,6 @@ __END__
 
 sub read_mbox;
 
-=head2 read_mbox( $file )
-
-Read C<$file>, a binmail mailbox file, and return a list of Mail::Internet
-objects.
-
-=cut
 
 use FileHandle;
 require POSIX;
@@ -57,7 +88,7 @@ require POSIX;
  local $_;
 
  while(<$fd>) {
-  if($blank && /\AFrom /) {
+  if($blank && /\AFrom .*\d{4}/) {
    push(@mail, $mail) if scalar(@{$mail});
    $mail = [ $_ ];
    $blank = 0;
@@ -75,17 +106,6 @@ require POSIX;
  return wantarray ? @mail : \@mail;
 }
 
-=head2 maildomain()
-
-Attempt to determine the current uers mail domain string via the following
-methods
-
- Look for a sendmail.cf file and extract DH parameter
- Look for a smail config file and usr the first host defined in hostname(s)
- Try an SMTP connect (if Net::SMTP exists) first to mailhost then localhost
- Use value from Net::Domain::domainname (if Net::Domain exists)
-
-=cut
 
 sub maildomain {
 
@@ -163,12 +183,6 @@ sub maildomain {
  return $domain;
 }
 
-=head2 mailaddress()
-
-Return a guess at the current users mail address. The user can force
-the return value by setting C<$ENV{MAILADDRESS}>
-
-=cut
 
 sub mailaddress {
 
@@ -197,19 +211,5 @@ sub mailaddress {
  $mailaddress;
 }
 
-=head1 AUTHOR
 
-Graham Barr <bodg@tiuk.ti.com>
-
-=head1 COPYRIGHT
-
-Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
-software; you can redistribute it and/or modify it under the same terms
-as Perl itself.
-
-=head1 REVISION
-
-$Revision: 1.8 $
-
-=cut
 

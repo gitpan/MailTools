@@ -4,7 +4,7 @@ package Mail::Alias;
 
 use Carp;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 sub new {
@@ -75,14 +75,18 @@ sub read {
  while(<ALIAS>) {
   next unless(/^\s*(alias|group)\s+(\S+)\s+(.*)/);
   my($group,$who) = ($2,$3);
-     
+
   $who =~ s/(\A[\s,]+|[\s,]+\Z)//g;
 
   my @resp = ();
 
   while(length($who)) {
-   $who =~ s/\A([^\"]\S*|\"[^\"]*\")\s*//;
-   push(@resp,$1);
+#   $who =~ s/\A([^\"]\S*|\"[^\"]*\")\s*//;
+#   my $ln = $1;
+#   $ln =~ s/\A\s*\"|\"\s*\Z//g;     
+ $who =~ s/\A\s*(\"?)([^\"]*)\1\s*//;
+   push(@resp,$2);
+#   push(@resp,$ln);
   }
   $me->{$group} = [ @resp ];
  }
@@ -104,7 +108,9 @@ sub write {
  }
 
  foreach $alias (sort keys %$me) {
-  print $fd "alias $alias ",join(" ",@{$me->{$alias}}),"\n";
+  my @a = @{$me->{$alias}};
+  map { $_ = '"' . $_ . '"' if /\s/ } @a;
+  print $fd "alias $alias ",join(" ",@a),"\n";
  }
 
  close(ALIAS) if($fd == \*ALIAS);
