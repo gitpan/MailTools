@@ -5,7 +5,7 @@ use strict;
 
 use vars qw($VERSION $useCache);
 
-$VERSION = "1.06";
+$VERSION = "1.07";
 sub Version { $VERSION; }
 
 =head1 NAME
@@ -46,7 +46,9 @@ if($^O eq "MacOS") {
 } else {
     @path = split(/:/, $ENV{MAILCAPS} ||
 	# this path is specified under RFC 1524 appendix A 
-	"$ENV{HOME}/.mailcap:/etc/mailcap:/usr/etc/mailcap:/usr/local/etc/mailcap");
+	( defined($ENV{HOME})
+	  ? "$ENV{HOME}/.mailcap:/etc/mailcap:/usr/etc/mailcap:/usr/local/etc/mailcap"
+	  : "/etc/mailcap:/usr/etc/mailcap:/usr/local/etc/mailcap"));
 }
 
 
@@ -76,6 +78,7 @@ sub new
 	}
     }
     my $self = bless {}, $class;
+    local *MAILCAP;
     if (defined $file && open(MAILCAP, $file)) {
 	$self->{'_file'} = $file;
       local($_);

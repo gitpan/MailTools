@@ -131,6 +131,8 @@ sub read {
  my $me = shift;
  my $file = shift;
 
+ local *ALIAS;
+ local $_;
  open(ALIAS,$file) || croak "Cannot open $file: $!\n";
 
  while(<ALIAS>) {
@@ -159,6 +161,7 @@ sub write {
  my $file = shift;
  my $alias;
  my $fd;
+ local *ALIAS;
 
  if(ref($file)) {
   $fd = $file;
@@ -191,6 +194,7 @@ sub write {
  my $file = shift;
  my $alias;
  my $fd;
+ local *ALIAS;
 
  if(ref($file)) {
   $fd = $file;
@@ -225,6 +229,8 @@ sub read {
  my $me = shift;
  my $file = shift;
 
+ local *ALIAS;
+ local $_;
  open(ALIAS,$file) || croak "Cannot open $file: $!\n";
 
  my $group = undef;

@@ -122,6 +122,7 @@ sub maildomain {
     ##
 
     local *CF;
+    local $_;
     my @sendmailcf = qw(/etc
 			/etc/sendmail
 			/etc/ucblib

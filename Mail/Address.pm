@@ -9,8 +9,9 @@ use strict;
 
 use Carp;
 use vars qw($VERSION);
+use locale;
 
-$VERSION = "1.15";
+$VERSION = "1.1501";
 sub Version { $VERSION }
 
 #
@@ -44,13 +45,13 @@ sub _extract_name
 
     # Set the case of the name to first char upper rest lower
     # Upcase first letter on name
-    s/\b([a-z]+)/\L\u$1/igo;
+    s/\b(\w+)/\L\u$1/igo;
 
     # Scottish names such as 'McLeod'
-    s/\bMc([a-z])/Mc\u$1/igo;
+    s/\bMc(\w)/Mc\u$1/igo;
 
     # Irish names such as 'O'Malley, O'Reilly'
-    s/\bo'([a-z])/O'\u$1/igo;
+    s/\bo'(\w)/O'\u$1/igo;
 
     # Roman numerals, eg 'Level III Support'
     s/\b(x*(ix)?v*(iv)?i*)\b/\U$1/igo; 
@@ -241,7 +242,7 @@ sub format {
    else {
     push(@tmp, $addr) if(defined $addr && length($addr));
    }
-   if($comment =~ /\S/) {
+   if(defined($comment) && $comment =~ /\S/) {
     $comment =~ s/^\s*\(?/(/;
     $comment =~ s/\)?\s*$/)/;
    }

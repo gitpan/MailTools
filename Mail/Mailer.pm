@@ -42,7 +42,10 @@ path to C<sendmail>.
 
 =item C<smtp>
 
-Use the C<smtp> protocol via Net::SMTP to deliver the mail.
+Use the C<smtp> protocol via Net::SMTP to deliver the mail. The server
+to use can be specified in C<@args> with
+
+    $mailer = new Mail::Mailer 'smtp', Server => $server;
 
 =item C<test>
 
@@ -118,7 +121,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.17"; # $Id: //depot/MailTools/Mail/Mailer.pm#12$
+$VERSION = "1.18"; # $Id: //depot/MailTools/Mail/Mailer.pm#13 $
 
 sub Version { $VERSION }
 
@@ -160,7 +163,7 @@ $MailerBinary = undef;
 
 # does this really need to be done? or should a default mailer be specfied?
 
-if($^O eq 'MacOS') {
+if($^O eq 'MacOS' || $^O eq 'VMS') {
     $MailerType = 'smtp';
     $MailerBinary = $Mailers{$MailerType};
 }

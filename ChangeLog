@@ -1,3 +1,39 @@
+Change 291 on 1999/03/31 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- fold_line now skips X-Face lines
+	
+	Mail::Filter
+	- Applied patch from <pncu_ss@uhura.cc.rochester.edu> (Josh Pincus)
+	  * Added return value to _filter() so that the function returns 
+	    the result of the last subroutine in the list of filters.
+	    (the manpage specifies that one should have been able to do this
+	    originally.)
+	
+	Mail::Mailer
+	- Treat VMS the same as MacOS as neither have sendmail et al.
+	
+	Mail::Mailer::smtp
+	- Server can now be specified to Mail::Mailer contructor
+	
+	Mail::Alias, Mail::Util,Mail:Internet, Mail::Cap
+	- local-ize some globals used
+	
+	Mail::Cap
+	- check in $ENV{HOME} is defined
+	
+	Mail::Address
+	- Fix capitalization problems with names like "Lieﬂegang"
+
+Change 290 on 1999/03/31 by <gbarr@pobox.com> (Graham Barr)
+
+	Increment version
+
+Change 213 on 1998/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- Fix use of uninitialized warning
+
 Change 190 on 1998/09/26 by <gbarr@pobox.com> (Graham Barr)
 
 	Update Makefile.PL for release 1.12

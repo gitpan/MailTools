@@ -328,6 +328,7 @@ use Mail::Address;
  my $pkg = ref $me;
  my @reply = ();
 
+ local *MAILHDR;
  if(open(MAILHDR,"$ENV{HOME}/.mailhdr")) 
   {
    # User has defined a mail header template
@@ -499,6 +500,7 @@ sub sign
 
    if(open(SIG,$sig))
     {
+     local $_;
      while(<SIG>) { last unless /\A(--)?\s*\Z/; }
 
      @sig = ($_,<SIG>,"\n");
@@ -735,9 +737,9 @@ it was specified.
 =item B<Body>
 
 The value of this option should be a reference to an array which contains
-the lines for the body of the message. If given then
-C<Mail::Internet> will not attempt to read the body from C<ARG>, if
-it was specified.
+the lines for the body of the message. Each line should be terminated with
+C<\n> (LF). If Body is given then C<Mail::Internet> will not attempt to
+read the body from C<ARG> (even if it is specified).
 
 =back
 

@@ -1,6 +1,6 @@
 require Mail::Header;
 
-print "1..16\n";
+print "1..18\n";
 
 $h = new Mail::Header;
 
@@ -11,17 +11,19 @@ $h->add('test',"a longer test header");
 $h->add('test',"an even longer test header");
 
 $h->print;
-
-print "not "
-	unless $h->get('test',0) eq "a test header\n";
+$str = $h->get('test',0);
+print "#$str#\nnot "
+	unless $str eq "a test header\n";
 printf "ok %d\n",++$t;
 
-print "not "
-	unless $h->get('test',1) eq "a longer test header\n";
+$str = $h->get('test',1);
+print "#$str#\nnot "
+	unless $str eq "a longer test header\n";
 printf "ok %d\n",++$t;
 
-print "not "
-	unless $h->get('test',2) eq "an even longer test header\n";
+$str = $h->get('test',2);
+print "#$str#\nnot "
+	unless $str eq "an even longer test header\n";
 printf "ok %d\n",++$t;
 
 $h->fold(30);
@@ -70,7 +72,7 @@ $head = <<EOF;
 From from_
 To: to
 From: from
-Subject: subject
+Subject:subject
 EOF
 $body = "body\n";
 $mail = "$head\n$body";
@@ -82,6 +84,14 @@ printf "ok %d\n",++$t;
 
 print "not "
 	unless $h->as_string eq $head;
+printf "ok %d\n",++$t;
+
+print "not "
+	unless $h->get('Subject') eq "subject\n";
+printf "ok %d\n",++$t;
+
+print "not "
+	unless $h->get('To') eq "to\n";
 printf "ok %d\n",++$t;
 
 $headin = <<EOF;

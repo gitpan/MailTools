@@ -19,7 +19,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.14";
+$VERSION = "1.15";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -83,6 +83,8 @@ sub _tidy_header
 sub _fold_line
 {
  my($ln,$maxlen) = @_;
+
+ return if $_[0] =~ /^X-Face:/io;
 
  $maxlen = 20
     if($maxlen < 20);
@@ -181,14 +183,14 @@ sub _fmt_line
    $ctag = $tag
    	if($modify);
 
-   $ctag =~ s/([^ :])\Z/$1:/o;
+   $ctag =~ s/([^ :])\Z/$1:/o if defined $ctag;
   }
 
  croak( "Bad RFC822 field name '$tag'\n")
    unless(defined $ctag && $ctag =~ /\A($FIELD_NAME|From )/oi);
 
  # Ensure the line starts with tag
- if($modify || $line !~ /\A\Q$ctag\E/i)
+ if(defined($ctag) && ($modify || $line !~ /\A\Q$ctag\E/i))
   {
    my $xtag;
    ($xtag = $ctag) =~ s/\s*\Z//o;
@@ -566,19 +568,27 @@ sub get
     unless exists $me->{'mail_hdr_hash'}{$tag};
 
  my $l = length($tag);
- $l += 2 unless $tag =~ / \Z/o;
+ $l += 1 unless $tag =~ / \Z/o;
 
  $idx = 0
     unless defined $idx || wantarray;
 
  if(defined $idx)
-  {
+  { 
    return defined $me->{'mail_hdr_hash'}{$tag}[$idx]
-        ? substr(${$me->{'mail_hdr_hash'}{$tag}[$idx]}, $l)
+        ?  eval { # why won't do work here ??
+	       my $tmp = substr(${$me->{'mail_hdr_hash'}{$tag}[$idx]}, $l);
+	      $tmp =~ s/^\s+//;
+	      $tmp;
+	  }
         : undef;
   }
 
- return  map { substr($$_,$l) } @{$me->{'mail_hdr_hash'}{$tag}};
+ return  map {
+		my $tmp = substr($$_,$l);
+		$tmp =~ s/^\s+//;
+		$tmp
+	     } @{$me->{'mail_hdr_hash'}{$tag}};
 }
 
 sub count

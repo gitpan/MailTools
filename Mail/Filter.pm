@@ -10,7 +10,7 @@ use Carp;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = "1.00";
+$VERSION = "1.01";
 
 sub new {
     my $self = shift;
@@ -42,6 +42,9 @@ sub _filter {
 	}
 	last unless ref($mail);
     }
+    # the specification indicates that the result of operations on $mail 
+    # should be returned by this function
+    return $mail;
 }
 
 sub filter {
@@ -109,12 +112,15 @@ C<Mail::Filter> provides an interface to filtering Email through multiple
 subroutines.
 
 C<Mail::Filter> filters mail by calling each filter subroutine in turn. Each
-filter subroutine is called with two arguments, the fist is the filter
-object and the second is the mail being filtered.
+filter subroutine is called with two arguments, the first is the filter
+object and the second is the mail or folder object being filtered.
 
 The result from each filter sub is passed to the next filter as the mail
 object. If a filter subroutine returns undef, then C<Mail::Filter> will abort
 and return immediately.
+
+The function returns the result from the last subroutine to operate on the 
+mail object.  
 
 =head1 CONSTRUCTOR
 
@@ -138,7 +144,7 @@ Add the given filters to the end of the fliter list.
 
 =item filter ( MAIL-OBJECT | MAIL-FOLDER )
 
-If the first argument is a C<Mail::Internet> object then this object will
+If the first argument is a C<Mail::Internet> object, then this object will
 be passed through the filter list. If the first argument is a C<Mail::Folder>
 object, then each message in turn will be passed through the filter list.
 
