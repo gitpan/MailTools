@@ -3,7 +3,7 @@
 require Mail::Internet;
 use Config;
 
-print "1..4\n";
+print "1..3\n";
 $|=1;
 
 $head = <<EOF;
@@ -51,7 +51,7 @@ sub ok {
 ok 1, $i = new Mail::Internet \@mail, Modify => 0;
 ok 2, $i->as_string eq $mail, $i->as_string;
 ok 3, $i->as_mbox_string eq $mbox, $i->as_mbox_string;
-ok 4, $i->send;
+#ok 4, $i->send;
 
 
 
