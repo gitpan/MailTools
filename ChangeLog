@@ -1,3 +1,35 @@
+*** Release 1.10
+
+Wed Nov 12 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Field::AddrList, Mail::Filter
+	- new modules
+	
+	Mail::Field
+	- Changes to the way sub-classes are registered and handled.
+
+
+Wed Nov  5 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Modified code that searches for the executable to run
+
+--- --- -- 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- Documentation updates
+
+	Mail::Header
+	- Small tweak to _fold_line for lines that are just shorter than the
+	  fold width, but include whitespace
+
+	Mail::Internet
+	- does not inherit from AutoLoader. Instead AUTOLOAD
+	  is GLOB'd to AutoLoader::AUTOLOAD
+
+	Mail::Mailer and Mail::Send
+	- Modified PODs to reflect that Tim Bunce is not the maintainer.
+
 Mon Feb 24 1997
 
  o Release 1.09

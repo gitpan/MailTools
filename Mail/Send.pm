@@ -19,7 +19,7 @@ Mail::Send - Simple electronic mail interface
     $msg = new Mail::Send Subject=>'example subject', To=>'timbo';
 
     $msg->to('user@host');
-    $msg->subject('user@host');
+    $msg->subject('example subject');
     $msg->cc('user@host');
     $msg->bcc('someone@else');
 
@@ -46,15 +46,20 @@ Mail::Mailer
 
 =head1 AUTHORS
 
-Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
-<gbarr@ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
-For support please contact comp.lang.perl.misc.
+Maintained by Graham Barr E<lt>F<gbarr@ti.com>E<gt>
+
+Original code written by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>,
+with a kick start from Graham Barr E<lt>F<gbarr@ti.com>E<gt>. With
+contributions by Gerard Hickey E<lt>F<hickey@ctron.com>E<gt>
+
+For support please contact comp.lang.perl.misc or Graham Barr
+E<lt>F<gbarr@ti.com>E<gt>
 
 =cut
 
 use vars qw($VERSION);
 
-$VERSION = do { my @r=(q$Revision: 1.6 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+$VERSION = do { my @r=(q$Revision: 1.8 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
 sub Version { $VERSION }
 
 sub new {

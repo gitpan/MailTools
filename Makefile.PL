@@ -1,11 +1,11 @@
 # This -*- perl -*- script makes the Makefile
-# $Id: Makefile.PL,v 1.2 1997/01/16 20:44:04 gbarr Exp $
+# $Id: Makefile.PL,v 1.3 1997/03/04 09:22:36 gbarr Exp $
 
 #--- Distribution section ---
 
 $NAME     = 'Mail';
 $DISTNAME = "MailTools";
-$VERSION  = "1.09";
+$VERSION  = "1.10";
 
 BEGIN { require 5.001 }
 

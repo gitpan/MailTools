@@ -12,204 +12,16 @@
 #
 
 package Mail::Header;
-use strict;
-
-=head1 NAME
-
-Mail::Header - manipulate mail RFC822 compliant headers
-
-=head1 SYNOPSIS
-
-    use Mail::Header;
-    
-    $head = new Mail::Header;
-    $head = new Mail::Header \*STDIN;
-    $head = new Mail::Header [<>], Modify => 0;
-
-=head1 DESCRIPTION
-
-This package provides a class object which can be used for reading, creating,
-manipulating and writing RFC822 compliant headers.
-
-=head1 CONSTRUCTOR
-
-=over 4
-
-=item new ( [ ARG ], [ OPTIONS ] )
-
-C<ARG> may be either a file descriptor (reference to a GLOB)
-or a reference to an array. If given the new object will be
-initialized with headers either from the array of read from 
-the file descriptor.
-
-C<OPTIONS> is a list of options given in the form of key-value
-pairs, just like a hash table. Valid options are
-
-=over 8
-
-=item B<Modify>
-
-If this value is I<true> then the headers will be re-formatted,
-otherwise the format of the header lines will remain unchanged.
-
-=item B<MailFrom>
-
-This option specifies what to do when a header in the form `From '
-is encountered. Valid values are C<IGNORE> - ignore and discard the header,
-C<ERROR> - invoke an error (call die), C<COERCE> - rename them as Mail-From
-and C<KEEP> - keep them.
-
-=item B<FoldLength>
-
-The default length of line to be used when folding header lines
-
-=back
-
-=back
-
-=head1 METHODS
-
-=over 4
-
-=item modify ( [ VALUE ] )
-
-If C<VALUE> is I<false> then C<Mail::Header> will not do any automatic
-reformatting of the headers, other than to ensure that the line
-starts with the tags given.
-
-=item mail_from ( OPTION )
-
-C<OPTION> specifies what to do when a C<`From '> line is encountered.
-Valid values are C<IGNORE> - ignore and discard the header,
-C<ERROR> - invoke an error (call die), C<COERCE> - rename them as Mail-From
-and C<KEEP> - keep them.
-
-=item fold ( [ LENGTH ] )
-
-Fold the header. If C<LENGTH> is not given then C<Mail::Header> uses the
-following rules to determine what length to fold a line.
-
-The fold length for the tag that is begin processed
-
-The default fold length for the tag that is being processed
-
-The default fold length for the object
-
-=item extract ( ARRAY_REF )
-
-Extract a header from the given array. C<extract> B<will modify> this array.
-Returns the object that the method was called on.
-
-=item read ( FD )
-
-Read a header from the given file descriptor.
-
-=item empty ()
-
-Empty the C<Mail::Header> object of all lines.
-
-=item header ( [ ARRAY_REF ] )
-
-C<header> does multiple operations. First it will extract a header from
-the array, if gieven. It will the reformat the header, if reformatting
-is permitted, and finally return a reference to an array which
-contains the header in a printable form.
-
-=item add ( TAG, LINE [, INDEX ] )
-
-Add a new line to the header. If C<TAG> is I<undef> the the tag will be
-extracted from the beginning of the given line. If C<INDEX> is given
-the new line will be inserted into the header at the given point, otherwise
-the new line will be appended to the end of the header.
-
-=item replace ( TAG, LINE [, INDEX ] )
-
-Replace a line in the header.  If C<TAG> is I<undef> the the tag will be
-extracted from the beginning of the given line. If C<INDEX> is given
-the new line will replace the Nth instance of that tag, otherwise the
-first instance of the tag is replaced. If the tag does not appear in the
-header then a new line will be appended to the header.
-
-=item combine ( TAG [, WITH ] )
-
-Combine all instances of C<TAG> into one. The lines will be
-joined togther with C<WITH>, or a single space if not given. The new
-item will be positioned in the header where the first instance was, all
-other instances of <TAG> will be removed.
-
-=item get ( TAG [, INDEX ] )
-
-Get the text form a line. If C<INDEX> is given then the text of the Nth
-instance will be returned. If it is not given the return value depends on the
-context in which C<get> was called. In an array context a list of all the
-text from all the instances of C<TAG> will be returned. In a scalar context
-the text for the first instance will be returned.
-
-=item delete ( TAG [, INDEX ] )
-
-Delete a tag from the header. If C<INDEX> id given then the Nth instance
-of the tag will be removed. If C<INDEX> is not given all instances
-of tag will be removed.
-
-=item count ( TAG )
-
-Returns the number of times the given atg appears in the header
-
-=item print ( [ FD ] )
-
-Print the header to the given file descriptor, or C<STDOUT> if no
-file descriptor is given.
-
-=item fold_length ( [ TAG ], [ LENGTH ] )
-
-Set the default fold length for all tags or just one. With no arguments
-the default fold length is returned. With two arguments it sets the fold
-length for the given tag and returns the previous value. If only C<LENGTH>
-is given it sets the default fold length for the current object.
-
-In the two argument form C<fold_length> may be called as a static method,
-setting default fold lengths for tags that will be used by B<all>
-C<Mail::Header> objects. See the C<fold> method for
-a description on how C<Mail::Header> uses these values.
-
-=item tags ()
-
-Retruns an array of all the tags that exist in the header. Each tag will
-only appear in the list once. The order of the tags is not specified.
-
-=item dup ()
-
-Create a duplicate of the current object.
-
-=item cleanup ()
-
-Remove any header line that, other than the tag, only contains whitespace
-
-=item unfold ( [ TAG ] )
-
-Unfold all instances of the given tag so that they do not spread across
-multiple lines. IF C<TAG> is not given then all lines are unfolded.
-
-=back
-
-=head1 AUTHOR
-
-Graham Barr <gbarr@ti.com>
-
-=head1 COPYRIGHT
-
-Copyright (c) 1996 Graham Barr. All rights reserved. This program is free
-software; you can redistribute it and/or modify it under the same terms
-as Perl itself.
-
-=cut
 
 require 5.002;
 
+use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = do { my @r=(q$Revision: 1.9 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+BEGIN {
+    $VERSION = "1.10";
+}
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -298,7 +110,7 @@ sub _fold_line
    $_[0] =~ s/\s+\n/\n/sog;
   }
 
- $_[0] =~ s/\A(\S+\s)[\s\n]*/$1/so; 
+ $_[0] =~ s/\A(\S+)\n\s*/$1 /so; 
 }
 
 # attempt to change the case of a tag to that required by RFC822. That
@@ -922,3 +734,192 @@ sub cleanup
 1; # keep require happy
 
 
+=head1 NAME
+
+Mail::Header - manipulate mail RFC822 compliant headers
+
+=head1 SYNOPSIS
+
+    use Mail::Header;
+    
+    $head = new Mail::Header;
+    $head = new Mail::Header \*STDIN;
+    $head = new Mail::Header [<>], Modify => 0;
+
+=head1 DESCRIPTION
+
+This package provides a class object which can be used for reading, creating,
+manipulating and writing RFC822 compliant headers.
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ( [ ARG ], [ OPTIONS ] )
+
+C<ARG> may be either a file descriptor (reference to a GLOB)
+or a reference to an array. If given the new object will be
+initialized with headers either from the array of read from 
+the file descriptor.
+
+C<OPTIONS> is a list of options given in the form of key-value
+pairs, just like a hash table. Valid options are
+
+=over 8
+
+=item B<Modify>
+
+If this value is I<true> then the headers will be re-formatted,
+otherwise the format of the header lines will remain unchanged.
+
+=item B<MailFrom>
+
+This option specifies what to do when a header in the form `From '
+is encountered. Valid values are C<IGNORE> - ignore and discard the header,
+C<ERROR> - invoke an error (call die), C<COERCE> - rename them as Mail-From
+and C<KEEP> - keep them.
+
+=item B<FoldLength>
+
+The default length of line to be used when folding header lines
+
+=back
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item modify ( [ VALUE ] )
+
+If C<VALUE> is I<false> then C<Mail::Header> will not do any automatic
+reformatting of the headers, other than to ensure that the line
+starts with the tags given.
+
+=item mail_from ( OPTION )
+
+C<OPTION> specifies what to do when a C<`From '> line is encountered.
+Valid values are C<IGNORE> - ignore and discard the header,
+C<ERROR> - invoke an error (call die), C<COERCE> - rename them as Mail-From
+and C<KEEP> - keep them.
+
+=item fold ( [ LENGTH ] )
+
+Fold the header. If C<LENGTH> is not given then C<Mail::Header> uses the
+following rules to determine what length to fold a line.
+
+The fold length for the tag that is begin processed
+
+The default fold length for the tag that is being processed
+
+The default fold length for the object
+
+=item extract ( ARRAY_REF )
+
+Extract a header from the given array. C<extract> B<will modify> this array.
+Returns the object that the method was called on.
+
+=item read ( FD )
+
+Read a header from the given file descriptor.
+
+=item empty ()
+
+Empty the C<Mail::Header> object of all lines.
+
+=item header ( [ ARRAY_REF ] )
+
+C<header> does multiple operations. First it will extract a header from
+the array, if gieven. It will the reformat the header, if reformatting
+is permitted, and finally return a reference to an array which
+contains the header in a printable form.
+
+=item add ( TAG, LINE [, INDEX ] )
+
+Add a new line to the header. If C<TAG> is I<undef> the the tag will be
+extracted from the beginning of the given line. If C<INDEX> is given
+the new line will be inserted into the header at the given point, otherwise
+the new line will be appended to the end of the header.
+
+=item replace ( TAG, LINE [, INDEX ] )
+
+Replace a line in the header.  If C<TAG> is I<undef> the the tag will be
+extracted from the beginning of the given line. If C<INDEX> is given
+the new line will replace the Nth instance of that tag, otherwise the
+first instance of the tag is replaced. If the tag does not appear in the
+header then a new line will be appended to the header.
+
+=item combine ( TAG [, WITH ] )
+
+Combine all instances of C<TAG> into one. The lines will be
+joined togther with C<WITH>, or a single space if not given. The new
+item will be positioned in the header where the first instance was, all
+other instances of <TAG> will be removed.
+
+=item get ( TAG [, INDEX ] )
+
+Get the text form a line. If C<INDEX> is given then the text of the Nth
+instance will be returned. If it is not given the return value depends on the
+context in which C<get> was called. In an array context a list of all the
+text from all the instances of C<TAG> will be returned. In a scalar context
+the text for the first instance will be returned.
+
+=item delete ( TAG [, INDEX ] )
+
+Delete a tag from the header. If C<INDEX> id given then the Nth instance
+of the tag will be removed. If C<INDEX> is not given all instances
+of tag will be removed.
+
+=item count ( TAG )
+
+Returns the number of times the given atg appears in the header
+
+=item print ( [ FD ] )
+
+Print the header to the given file descriptor, or C<STDOUT> if no
+file descriptor is given.
+
+=item fold_length ( [ TAG ], [ LENGTH ] )
+
+Set the default fold length for all tags or just one. With no arguments
+the default fold length is returned. With two arguments it sets the fold
+length for the given tag and returns the previous value. If only C<LENGTH>
+is given it sets the default fold length for the current object.
+
+In the two argument form C<fold_length> may be called as a static method,
+setting default fold lengths for tags that will be used by B<all>
+C<Mail::Header> objects. See the C<fold> method for
+a description on how C<Mail::Header> uses these values.
+
+=item tags ()
+
+Retruns an array of all the tags that exist in the header. Each tag will
+only appear in the list once. The order of the tags is not specified.
+
+=item dup ()
+
+Create a duplicate of the current object.
+
+=item cleanup ()
+
+Remove any header line that, other than the tag, only contains whitespace
+
+=item unfold ( [ TAG ] )
+
+Unfold all instances of the given tag so that they do not spread across
+multiple lines. IF C<TAG> is not given then all lines are unfolded.
+
+=back
+
+=head1 AUTHOR
+
+Graham Barr <gbarr@ti.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1996 Graham Barr. All rights reserved. This program is free
+software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
+
+=cut

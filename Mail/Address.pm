@@ -26,8 +26,8 @@ the To and Cc lines found in an email message.
 
  Mail::Address->new("Perl5 Porters", "perl5-porters@africa.nicoh.com");
 
-Create a new object which represent an address with the elements given. In
-a message these 3 elements would be seen like:
+Create a new C<Mail::Address> object which represents an address with the
+elements given. In a message these 3 elements would be seen like:
 
  PHRASE <ADDRESS> (COMMENT)
  ADDRESS (COMMENT)
@@ -36,8 +36,8 @@ a message these 3 elements would be seen like:
 
  Mail::Address->parse($line);
 
-Parse the given line a return a list of extracted objects. The line would
-normally be one taken from a To,Cc or Bcc line in a message
+Parse the given line a return a list of extracted C<Mail::Address> objects.
+The line would normally be one taken from a To,Cc or Bcc line in a message
 
 =back
 
@@ -100,7 +100,7 @@ as Perl itself.
 use Carp;
 use vars qw($VERSION);
 
-$VERSION = do { my @r=(q$Revision: 1.11 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+$VERSION = do { my @r=(q$Revision: 1.12 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
 sub Version { $VERSION }
 
 #

@@ -1,6 +1,6 @@
 # Mail::Field.pm
 #
-# Copyright (c) 1995 Graham Barr <gbarr@ti.com>. All rights reserved.
+# Copyright (c) 1995 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -130,7 +130,7 @@ C<_header_pkg_name> subroutine in C<Mail::Field>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@ti.com>
+Graham Barr <gbarr@pobox.com>
 
 =head1 SEE ALSO
 
@@ -154,10 +154,7 @@ use Carp;
 use strict;
 use vars qw($AUTOLOAD $VERSION);
 
-$VERSION = do { my @r=(q$Revision: 1.4 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
-
-my %Register = ();	# method => package name translation
-my %Loaded   = ();	# loaded packages
+$VERSION = "1.05";
 
 sub _header_pkg_name
 {
@@ -241,26 +238,6 @@ sub import
   }
 }
 
-sub _load_package
-{
- my $field = lc shift;
-
- my $pkg = exists $Register{$field}
-		? $Register{$field}
-		: _header_pkg_name($field);
-
- if( eval "require $pkg")
-  {
-   croak "$pkg did not call register"
-	unless exists $Loaded{$pkg};
-  }
- elsif($@ !~ /^Can't locate /)
-  {
-   croak $@;
-  }
- $pkg;
-}
-
 
 ##
 ## register a header class, this creates a new method in Mail::Field
@@ -279,17 +256,15 @@ sub register
 	if($pkg eq "Mail::Field");
 
  croak "Re-register of $method"
-	if exists $Register{$method} && $Register{$method} ne $pkg;
+	if Mail::Field->can($method);
 
- $Register{$method} = $pkg;
+ no strict 'refs';
+ *{$method} = sub {
+	shift;
+	eval "require $pkg" || die $@;
+	$pkg->_build(@_);
+ };
 
- if((caller)[0] eq $pkg)
-  {
-   no strict;
-
-   *{$method} = sub { shift; $pkg->_build(@_) };
-   $Loaded{$pkg} = 1;
-  }
 }
 
 ##
@@ -310,9 +285,11 @@ sub _build
 sub new
 {
  my $self  = shift; # ignored
- my $field = shift;
+ my $field = lc shift;
 
- _build(_load_package($field), @_);
+ $field =~ tr/-/_/;
+ 
+ $self->$field(@_);
 }
 
 ##
@@ -430,9 +407,9 @@ sub AUTOLOAD
  croak "Undefined subroutine &$AUTOLOAD called"
 	unless $method =~ /^[^A-Z\x00-\x1f\x80-\xff :]+$/o;
 
- my $pkg = _load_package($method);
+ my $pkg = _header_pkg_name($method);
 
- unless(exists $Loaded{$pkg})
+ unless(eval "require " . $pkg)
   {
    my $tag = $method;
 
@@ -444,13 +421,10 @@ sub AUTOLOAD
 
    @{$pkg . "::ISA"} = qw(Mail::Field::Generic);
    *{$pkg . "::tag"} = sub { $tag };
-
-   # Normal pkgs call register to do this, but (caller)[0]
-   # does not equal the pkg name so it does not work :-(
-
-   $Register{$method} = $pkg;
-   *{$method} = sub { shift; $pkg->_build(@_) };
   }
+
+  $pkg->register($method)
+	unless(Mail::Field->can($method));
 
  goto &$AUTOLOAD;
 }

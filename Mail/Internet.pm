@@ -3,172 +3,22 @@
 # Copyright (c) 1995 Graham Barr <gbarr@ti.com>. All rights
 # reserved. This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
+#
 
 package Mail::Internet;
 use strict;
-
-=head1 NAME
-
-Mail::Internet - manipulate Internet format (RFC 822) mail messages
-
-=head1 SYNOPSIS
-
-    use Mail::Internet;
-
-=head1 DESCRIPTION
-
-This package provides a class object which can be used for reading, creating,
-manipulating and writing a message with RFC822 compliant headers.
-
-=head1 CONSTRUCTOR
-
-=over 4
-
-=item new ( [ ARG ], [ OPTIONS ] )
-
-C<ARG> is optiona and may be either a file descriptor (reference to a GLOB)
-or a reference to an array. If given the new object will be
-initialized with headers either from the array of read from 
-the file descriptor.
-
-C<OPTIONS> is a list of options given in the form of key-value
-pairs, just like a hash table. Valid options are
-
-=over 8
-
-=item B<Header>
-
-The value of this option should be a C<Mail::Header> object. If given then
-C<Mail::Internet> will not attempt to read a mail header from C<ARG>, if
-it was specified.
-
-=item B<Body>
-
-The value of this option should be a reference to an array which contains
-the lines for the body of the message. If given then
-C<Mail::Internet> will not attempt to read the body from C<ARG>, if
-it was specified.
-
-=back
-
-The Mail::Header options C<Modify>, C<MailFrom> and C<FoldLength> may
-also be given.
-
-=back
-
-=head1 METHODS
-
-=over 4
-
-=item body ()
-
-Returns the body of the message. This is a reference to an array.
-Each entry in the array represents a single line in the message.
-
-=item print_header ( [ FILEHANDLE ] )
-
-=item print_body ( [ FILEHANDLE ] )
-
-=item print ( [ FILEHANDLE ] )
-
-Print the header, body or whole message to file descriptor I<FILEHANDLE>.
-I<$fd> should be a reference to a GLOB. If I<FILEHANDLE> is not given the
-output will be sent to STDOUT.
-
-    $mail->print( \*STDOUT );  # Print message to STDOUT
-
-=item head ()
-
-Returns the C<Mail::Header> object which holds the headers for the current
-message
-
-=back
-
-=head1 UTILITY METHODS
-
-The following methods are more a utility type than a manipulation
-type of method.
-
-=over 4
-
-=item remove_sig ( [ NLINES ] )
-
-Attempts to remove a users signature from the body of a message. It does this 
-by looking for a line equal to C<'-- '> within the last C<NLINES> of the
-message. If found then that line and all lines after it will be removed. If
-C<NLINES> is not given a default value of 10 will be used. This would be of
-most use in auto-reply scripts.
-
-=item tidy_body ()
-
-Removes all leading and trailing lines from the body that only contain
-white spaces.
-
-=item reply ()
-
-Create a new object with header initialised for a reply to the current 
-object. And the body will be a copy of the current message indented.
-
-=item add_signature ( [ FILE ] )
-
-Append a signature to the message. C<FILE> is a file which contains
-the signature, if not given then the file "$ENV{HOME}/.signature"
-will be checked for.
-
-=item smtpsend ()
-
-Send a Mail::Internet message via SMTP
-
-The message will be sent to all addresses on the To, Cc and Bcc
-lines. The SMTP host is found by attempting connections first
-to hosts specified in C<$ENV{SMTPHOSTS}>, a colon separated list,
-then C<mailhost> and C<localhost>.
-
-=item nntppost ()
-
-Post an article via NNTP, require News::NNTPClient.
-
-=item escape_from ()
-
-It can cause problems with some applications if a message contains a line
-starting with C<`From '>, in particular when attempting to split a folder.
-This method inserts a leading C<`>'> on anyline starting with C<`From '>
-
-=item unescape_from ()
-
-This method will remove the escaping added bu escape_from
-
-=back
-
-=head1 SEE ALSO
-
-L<Mail::Header>
-L<Mail::Address>
-
-=head1 AUTHOR
-
-Graham Barr <gbarr@ti.com>
-
-=head1 COPYRIGHT
-
-Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
-software; you can redistribute it and/or modify it under the same terms
-as Perl itself.
-
-=cut
 
 require 5.002;
 
 use Carp;
 use AutoLoader;
 use Mail::Header;
-use vars qw($VERSION @ISA);
+use vars qw($VERSION);
 
-$VERSION = do { my @r=(q$Revision: 1.28 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
-@ISA     = qw(AutoLoader);
-
-# stop import being inherited from AutoLoader by use Mail::Internet :-(
-sub import {}
+BEGIN {
+    $VERSION = "1.29";
+    *AUTOLOAD = \&AutoLoader::AUTOLOAD
+}
 
 sub new
 {
@@ -764,5 +614,156 @@ sub unescape_from
 
 1; # keep require happy
 
+
+
+=head1 NAME
+
+Mail::Internet - manipulate Internet format (RFC 822) mail messages
+
+=head1 SYNOPSIS
+
+    use Mail::Internet;
+
+=head1 DESCRIPTION
+
+This package provides a class object which can be used for reading, creating,
+manipulating and writing a message with RFC822 compliant headers.
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ( [ ARG ], [ OPTIONS ] )
+
+C<ARG> is optiona and may be either a file descriptor (reference to a GLOB)
+or a reference to an array. If given the new object will be
+initialized with headers either from the array of read from 
+the file descriptor.
+
+C<OPTIONS> is a list of options given in the form of key-value
+pairs, just like a hash table. Valid options are
+
+=over 8
+
+=item B<Header>
+
+The value of this option should be a C<Mail::Header> object. If given then
+C<Mail::Internet> will not attempt to read a mail header from C<ARG>, if
+it was specified.
+
+=item B<Body>
+
+The value of this option should be a reference to an array which contains
+the lines for the body of the message. If given then
+C<Mail::Internet> will not attempt to read the body from C<ARG>, if
+it was specified.
+
+=back
+
+The Mail::Header options C<Modify>, C<MailFrom> and C<FoldLength> may
+also be given.
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item body ()
+
+Returns the body of the message. This is a reference to an array.
+Each entry in the array represents a single line in the message.
+
+=item print_header ( [ FILEHANDLE ] )
+
+=item print_body ( [ FILEHANDLE ] )
+
+=item print ( [ FILEHANDLE ] )
+
+Print the header, body or whole message to file descriptor I<FILEHANDLE>.
+I<$fd> should be a reference to a GLOB. If I<FILEHANDLE> is not given the
+output will be sent to STDOUT.
+
+    $mail->print( \*STDOUT );  # Print message to STDOUT
+
+=item head ()
+
+Returns the C<Mail::Header> object which holds the headers for the current
+message
+
+=back
+
+=head1 UTILITY METHODS
+
+The following methods are more a utility type than a manipulation
+type of method.
+
+=over 4
+
+=item remove_sig ( [ NLINES ] )
+
+Attempts to remove a users signature from the body of a message. It does this 
+by looking for a line equal to C<'-- '> within the last C<NLINES> of the
+message. If found then that line and all lines after it will be removed. If
+C<NLINES> is not given a default value of 10 will be used. This would be of
+most use in auto-reply scripts.
+
+=item tidy_body ()
+
+Removes all leading and trailing lines from the body that only contain
+white spaces.
+
+=item reply ()
+
+Create a new object with header initialised for a reply to the current 
+object. And the body will be a copy of the current message indented.
+
+=item add_signature ( [ FILE ] )
+
+Append a signature to the message. C<FILE> is a file which contains
+the signature, if not given then the file "$ENV{HOME}/.signature"
+will be checked for.
+
+=item smtpsend ()
+
+Send a Mail::Internet message via SMTP
+
+The message will be sent to all addresses on the To, Cc and Bcc
+lines. The SMTP host is found by attempting connections first
+to hosts specified in C<$ENV{SMTPHOSTS}>, a colon separated list,
+then C<mailhost> and C<localhost>.
+
+=item nntppost ()
+
+Post an article via NNTP, require News::NNTPClient.
+
+=item escape_from ()
+
+It can cause problems with some applications if a message contains a line
+starting with C<`From '>, in particular when attempting to split a folder.
+This method inserts a leading C<`>'> on anyline starting with C<`From '>
+
+=item unescape_from ()
+
+This method will remove the escaping added bu escape_from
+
+=back
+
+=head1 SEE ALSO
+
+L<Mail::Header>
+L<Mail::Address>
+
+=head1 AUTHOR
+
+Graham Barr <gbarr@ti.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
+
+=cut
 
 

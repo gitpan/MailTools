@@ -76,62 +76,70 @@ Mail::Send
 
 =head1 AUTHORS
 
-Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
-<gbarr@ti.com>. With contributions by Gerard Hickey <hickey@ctron.com>
-For support please contact comp.lang.perl.misc.
-Small fix and documentation by Nathan Torkington <gnat@frii.com>.
+Maintained by Graham Barr E<lt>F<gbarr@ti.com>E<gt>
+
+Original code written by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>,
+with a kick start from Graham Barr E<lt>F<gbarr@ti.com>E<gt>. With
+contributions by Gerard Hickey E<lt>F<hickey@ctron.com>E<gt> Small fix
+and documentation by Nathan Torkington E<lt>F<gnat@frii.com>E<gt>.
+
+For support please contact comp.lang.perl.misc or Graham Barr
+E<lt>F<gbarr@ti.com>E<gt>
 
 =cut
 
 use Carp;
-use FileHandle;
-use Symbol;
+use IO::Handle;
 use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
+use Config;
+use strict;
 
-$VERSION = do { my @r=(q$Revision: 1.10 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.13"; # $Id: //depot/MailTools/Mail/Mailer.pm#2$
+
 sub Version { $VERSION }
 
-@ISA = qw(FileHandle);
+@ISA = qw(IO::Handle);
 
 # Suggested binaries for types?  Should this be handled in the object class?
 @Mailers = (
-    'mail'	=> 	'mail',			# Body on stdin with tilde escapes
-    'sendmail'	=>	'/usr/lib/sendmail',	# Headers-blank-Body all on stdin
+
+    # Body on stdin with tilde escapes
+    'mail'	=> 	'mail',
+
+    # Headers-blank-Body all on stdin
+    'sendmail'  =>      '/usr/lib/sendmail;/usr/sbin/sendmail;/usr/ucblib/sendmail',
+
     'smtp'	=> 	'telnet',
     'test'	=> 	'test'
 );
 
-push(@Mailers, split(/:/,$ENV{PERL_MAILERS})) if $ENV{PERL_MAILERS};
-%Mailers = @Mailers;
+# There are several flavours of mail, which do we have ????
 
-$MailerBinary = undef;
+{
+    my $cmd = is_exe('mailx;Mail;mail');
+    my $osname = $Config{'osname'};
 
-# On solaris mail does not except ~ escapes, you must use mailx
-
-use Config;
-
-if(is_exe('mailx')) {
-    my $cmd = 'mailx';
-    my $osname = $Config{osname};
     if($osname =~ /solaris/io) {
 	$cmd .= " -~";
     }
     elsif($osname =~ /linux/io) {
-	$cmd .= " -i";
+	$cmd .= " -I";
     }
-    $Mailers{mail} = $cmd;
-}
-elsif(is_exe('Mail')) {
-    $Mailers{mail} = 'Mail';
+    push @Mailers, 'mail', $cmd;
 }
 
+push(@Mailers, split(/:/,$ENV{PERL_MAILERS})) if $ENV{PERL_MAILERS};
+
+%Mailers = @Mailers;
+
+$MailerBinary = undef;
+
 # does this really need to be done? or should a default mailer be specfied?
-my $i;
-foreach $i ( 0..$#Mailers ) {
-    next if $i % 2;
+
+for(my $i = 0 ; $i < @Mailers ; $i += 2) {
     $MailerType = $Mailers[$i];
     my $binary;
-    if ($binary=is_exe($Mailers{$MailerType})) {
+    if($binary = is_exe($Mailers{$MailerType})) {
 	$MailerBinary = $binary;
 	last;
     }
@@ -163,13 +171,21 @@ sub to_array {
 
 sub is_exe {
     my $exe = shift;
-    my $dir;
-    # remove any options
-    my $name = ($exe =~ /(\S+)/)[0];
-    # check for absolute or relative path
-    return ($exe) if (-x $name and ! -d $name and $name =~ m:/:);
-    foreach $dir (split(/:/, $ENV{PATH})) {
-	return "$dir/$exe" if (-x "$dir/$name" && ! -d "$dir/$name");
+
+    foreach my $cmd (split /;/, $exe) {
+	$cmd =~ s/^\s+//;
+
+	# remove any options
+	my $name = ($cmd =~ /^(\S+)/)[0];
+
+	# check for absolute or relative path
+	return ($cmd)
+	    if (-x $name and ! -d $name and $name =~ m:/:);
+
+	foreach my $dir (split(/:/, $ENV{PATH})) {
+	    return "$dir/$cmd"
+		if (-x "$dir/$name" && ! -d "$dir/$name");
+	}
     }
     0;
 }
@@ -186,14 +202,14 @@ sub new {
     croak "Mailer '$type' not known, please specify correct type"
 	unless $type;
 
-    local($glob) = gensym;	# Make glob for FileHandle and attributes
+    $class = "Mail::Mailer::$type";
+    my $glob = $class->SUPER::new; # local($glob) = gensym;	# Make glob for FileHandle and attributes
 
     %{*$glob} = (Exe 	=> $exe,
 		 Args	=> [ @args ]
 		);
     
-    $class = "Mail::Mailer::$type";
-    bless $glob, $class;
+    $glob; # bless $glob, $class;
 }
 
 
@@ -220,6 +236,7 @@ sub exec {
     my($self, $exe, $args, $to) = @_;
     # Fork and exec the mailer (no shell involved to avoid risks)
     my @exe = split(/\s+/,$exe);
+
     exec(@exe, @$args, @$to);
 }
 
@@ -259,6 +276,7 @@ sub DESTROY {
 ##
 
 package Mail::Mailer::rfc822;
+use vars qw(@ISA);
 @ISA = qw(Mail::Mailer);
 
 sub set_headers {
@@ -269,7 +287,7 @@ sub set_headers {
 	next unless m/^[A-Z]/;
 	print $self "$_: ", join(",", $self->to_array($hdrs->{$_})), "\n";
     }
-    print $self "\n";	# termitane headers
+    print $self "\n";	# terminate headers
 }
 
 ##
@@ -277,6 +295,7 @@ sub set_headers {
 ##
 
 package Mail::Mailer::sendmail;
+use vars qw(@ISA);
 @ISA = qw(Mail::Mailer::rfc822);
 
 
@@ -294,6 +313,7 @@ sub exec {
 ##
 
 package Mail::Mailer::mail;
+use vars qw(@ISA);
 @ISA = qw(Mail::Mailer);
 
 my %hdrs = qw(Cc ~c Bcc ~b Subject ~s);
@@ -314,6 +334,7 @@ sub set_headers {
 ##
 
 package Mail::Mailer::smtp;		# just for fun
+use vars qw(@ISA);
 @ISA = qw(Mail::Mailer::rfc822);
 
 sub exec {
@@ -338,6 +359,7 @@ sub epilogue {
 ##
 
 package Mail::Mailer::test;
+use vars qw(@ISA);
 @ISA = qw(Mail::Mailer::rfc822);
 
 sub can_cc { 0 }
