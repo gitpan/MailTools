@@ -32,7 +32,8 @@ behaviour of a method by passing C<$command> to the C<new> method.
 =item C<mail>
 
 Use the Unix system C<mail> program to deliver the mail.  C<$command>
-is the path to C<mail>.
+is the path to C<mail>.  Mail::Mailer will search for C<mailx>, C<Mail>
+and C<mail> (in this order).
 
 =item C<sendmail>
 
@@ -47,8 +48,7 @@ mail is ever sent.  C<$command> is ignored.
 =back
 
 C<Mail::Mailer> will search for executables in the above order. The
-default mailer will be the first one found. In the case of C<mail>
-Mail::Mailer will search for C<mail>, C<mailx> and C<Mail>.
+default mailer will be the first one found.
 
 =head2 ARGUMENTS
 
@@ -60,7 +60,7 @@ C<open> is given a reference to a hash.  The hash consists of key and
 value pairs, the key being the name of the header field (eg, C<To>),
 and the value being the corresponding contents of the header field.
 The value can either be a scalar (eg, C<gnat@frii.com>) or a reference
-to an array of scalars (C<eg, [gnat@frii.com, Tim.Bunce@ig.co.uk]>).
+to an array of scalars (C<eg, ['gnat@frii.com', 'Tim.Bunce@ig.co.uk']>).
 
 =head1 TO DO
 
@@ -70,21 +70,41 @@ valid in the face of newlines and longlines etc.
 Secure all forms of send_headers() against hacker attack and invalid
 contents. Especially "\n~..." in ...::mail::send_headers.
 
+=head1 ENVIRONMENT VARIABLES
+
+=over 4
+
+=item PERL_MAILERS
+
+Augments/override the build in choice for binary used to send out
+our mail messages.
+
+Format:
+
+    "type1:mailbinary1;mailbinary2;...:type2:mailbinaryX;...:..."
+
+Example: assume you want you use private sendmail binary instead
+of mailx, one could set C<PERL_MAILERS> to:
+
+    "mail:/does/not/exists:sendmail:$HOME/test/bin/sendmail"
+
+=back
+
 =head1 SEE ALSO
 
 Mail::Send
 
 =head1 AUTHORS
 
-Maintained by Graham Barr E<lt>F<gbarr@ti.com>E<gt>
+Maintained by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 
 Original code written by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>,
-with a kick start from Graham Barr E<lt>F<gbarr@ti.com>E<gt>. With
+with a kick start from Graham Barr E<lt>F<gbarr@pobox.com>E<gt>. With
 contributions by Gerard Hickey E<lt>F<hickey@ctron.com>E<gt> Small fix
 and documentation by Nathan Torkington E<lt>F<gnat@frii.com>E<gt>.
 
 For support please contact comp.lang.perl.misc or Graham Barr
-E<lt>F<gbarr@ti.com>E<gt>
+E<lt>F<gbarr@pobox.com>E<gt>
 
 =cut
 
@@ -94,7 +114,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.13"; # $Id: //depot/MailTools/Mail/Mailer.pm#2$
+$VERSION = "1.12"; # $Id: //depot/MailTools/Mail/Mailer.pm#4$
 
 sub Version { $VERSION }
 
@@ -122,7 +142,7 @@ sub Version { $VERSION }
     if($osname =~ /solaris/io) {
 	$cmd .= " -~";
     }
-    elsif($osname =~ /linux/io) {
+    elsif($osname =~ /(?:linux)|(?:bsdos)/io) {
 	$cmd .= " -I";
     }
     push @Mailers, 'mail', $cmd;

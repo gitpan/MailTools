@@ -310,7 +310,7 @@ modify it under the same terms as Perl itself.
 
 Gisle Aas <aas@oslonett.no> 
 
-Maintained by Graham Barr <gbarr@ti.com>
+Maintained by Graham Barr <gbarr@pobox.com>
 
 =cut
 

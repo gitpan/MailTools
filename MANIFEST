@@ -8,8 +8,8 @@ Mail/Field/AddrList.pm		(v1.0)
 Mail/Field/Date.pm		(v1.03) 
 Mail/Filter.pm			(v1.00) 
 Mail/Header.pm			(v1.10) 
-Mail/Internet.pm		(v1.29) Functions for RFC822 mail manipulations
-Mail/Mailer.pm			(v1.13) Simple mail agent interface
+Mail/Internet.pm		(v1.30) Functions for RFC822 mail manipulations
+Mail/Mailer.pm			(v1.12) Simple mail agent interface
 Mail/Send.pm			(v1.08) Simple interface for sending mail
 Mail/Util.pm			(v1.12) Mail related utilities
 Makefile.PL			Perl MakeMaker Makefile

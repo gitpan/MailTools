@@ -1,6 +1,6 @@
 # Mail::Internet.pm
 #
-# Copyright (c) 1995 Graham Barr <gbarr@ti.com>. All rights
+# Copyright (c) 1995-7 Graham Barr <gbarr@pobox.com>. All rights
 # reserved. This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
@@ -16,7 +16,7 @@ use Mail::Header;
 use vars qw($VERSION);
 
 BEGIN {
-    $VERSION = "1.29";
+    $VERSION = "1.30";
     *AUTOLOAD = \&AutoLoader::AUTOLOAD
 }
 
@@ -558,11 +558,12 @@ sub nntppost;
 use Mail::Util qw(mailaddress);
 
 
-require News::NNTPClient;
+require Net::NNTP;
 
  sub nntppost
 {
  my $mail = shift;
+ my %opt = @_;
 
  my $groups = $mail->get('Newsgroups') || "";
  my @groups = split(/[\s,]+/,$groups);
@@ -583,7 +584,13 @@ require News::NNTPClient;
  # Remove these incase the NNTP host decides to mail as well as me
  $art->delete(qw(To Cc Bcc)); 
 
- my $news = new News::NNTPClient;
+ my @opt = ();
+ push(@opt, $opt{'Host'}) if exists $opt{'Host'};
+ push(@opt, 'Port', $opt{'Port'}) if exists $opt{'Port'};
+ push(@opt, 'Debug', $opt{'Debug'}) if exists $opt{'Debug'};
+warn join(" ",@opt);
+ my $news = new Net::NNTP(@opt) or return ();
+
  $news->post(@{$art->header},"\n",@{$art->body});
 
  my $code = $news->code;
@@ -733,9 +740,27 @@ lines. The SMTP host is found by attempting connections first
 to hosts specified in C<$ENV{SMTPHOSTS}>, a colon separated list,
 then C<mailhost> and C<localhost>.
 
-=item nntppost ()
+=item nntppost ( [ OPTIONS ] )
 
-Post an article via NNTP, require News::NNTPClient.
+Post an article via NNTP, require Net::NNTP.
+
+Options are passed as key-value pairs. Current options are
+
+=over 4
+
+=item Host
+
+Name of NNTP server to connect to
+
+=item Port
+
+Port number to connect to on remote host
+
+=item Debug
+
+Debug value to pass to Net::NNTP, see <Net::NNTP>
+
+=back
 
 =item escape_from ()
 
@@ -756,11 +781,11 @@ L<Mail::Address>
 
 =head1 AUTHOR
 
-Graham Barr <gbarr@ti.com>
+Graham Barr <gbarr@pobox.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+Copyright (c) 1995-7 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 

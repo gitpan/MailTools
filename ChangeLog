@@ -1,3 +1,19 @@
+Mon Nov 17 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Internet
+	- added options to nntppost
+
+
+	Mail::Mailer.pm
+	- Added check for bsdos to add -I option to Mail
+	
+	t/mailcap.t
+	- MAde less unix specific by changing from using 'test' to using perl
+
+Sun Nov 16 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Added Mail::Field::AddrList to MANIFEST
+
 *** Release 1.10
 
 Wed Nov 12 1997 <gbarr@pobox.com> (Graham Barr)

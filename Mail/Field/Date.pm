@@ -1,4 +1,10 @@
-## An example of a Mail::Field::* class
+# Mail::Field::Date
+#
+# Copyright (c) 1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#
+# An example of a Mail::Field::* class
 
 package Mail::Field::Date;
 

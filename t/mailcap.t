@@ -16,7 +16,7 @@ print MAILCAP <<'EOT';
 image/*; xv %s \; echo "Showing image %s"; description=Simple image format
 
 text/plain; cat %s;\
-  test=test "`echo %{charset} | tr '[A-Z]' '[a-z]'`"  = iso-8859-1;\
+  test=perl -e "exit (!(q{%{charset}} =~ /^iso-8859-1$/i))";\
   copiousoutput
 
 text/plain; smartcat %s; copiousoutput

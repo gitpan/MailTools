@@ -37,7 +37,7 @@ To, From, Cc, Reply-To and Sender.
 =head1 AUTHOR
 
 Peter Orbaek <poe@cit.dk> 26-Feb-97
-Modified by Graham Barr <gbarr@ti.com>
+Modified by Graham Barr <gbarr@pobox.com>
 
 =cut
 
