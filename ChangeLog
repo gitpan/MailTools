@@ -1,4 +1,9 @@
 
+version 1.55: Mon Jan  6 08:05:58 CET 2003
+
+	- One explicit utf8::downgrade for 5.8.0, this time for
+	  Mail::Address by [Autrijus Tang].
+
 version 1.54: Mon Jan  6 08:00:00 CET 2003
 
 	- Another try to avoid the utf8 problems, this time by
