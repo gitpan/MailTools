@@ -4,6 +4,7 @@ Mail/Address.pm			(v1.12) Manipulation of electronic mail addresses
 Mail/Alias.pm			(v1.06) Read/Write various mail alias file formats
 Mail/Cap.pm			(v1.05) Read mailcap files
 Mail/Field.pm			(v1.05) 
+Mail/Field/AddrList.pm		(v1.0) 
 Mail/Field/Date.pm		(v1.03) 
 Mail/Filter.pm			(v1.00) 
 Mail/Header.pm			(v1.10) 
