@@ -1,4 +1,9 @@
 
+version 1.64: Tue Aug 17 22:24:22 CEST 2004
+
+	- CPAN failed to index 1.63 correctly, so hopefully it will
+	  work now.
+
 version 1.63: Mon Aug 16 17:28:15 CEST 2004
 
 	- [Craig Davison] Fixed date format in Mail::Field::Date to
