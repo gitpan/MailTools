@@ -11,7 +11,7 @@ use Carp;
 use vars qw($VERSION);
 use locale;
 
-$VERSION = "1.16";
+$VERSION = "1.17";
 sub Version { $VERSION }
 
 #
@@ -266,9 +266,9 @@ sub name
     my $name = _extract_name($phrase);
     
     # first.last@domain address
-    if($name eq '' && $addr =~ /([^\%\.\@\_]+([\.\_][^\%\.\@\_]+)+)[\@\%]/o)
+    if($name eq '' && $addr =~ /([^\%\.\@_]+([\._][^\%\.\@_]+)+)[\@\%]/o)
     {
-	($name = $1) =~ s/[\.\_]+/ /go;
+	($name = $1) =~ s/[\._]+/ /go;
 	$name = _extract_name($name);
     }
     

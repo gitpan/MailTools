@@ -6,13 +6,13 @@
 
 package Mail::Field;
 
-# $Id: //depot/MailTools/Mail/Field.pm#6 $
+# $Id: //depot/MailTools/Mail/Field.pm#7 $
 
 use Carp;
 use strict;
 use vars qw($AUTOLOAD $VERSION);
 
-$VERSION = "1.07";
+$VERSION = "1.08";
 
 unless(defined &UNIVERSAL::can) {
     *UNIVERSAL::can = sub {
@@ -74,7 +74,7 @@ sub _require_dir
      next
 	unless $f =~ /^([\w\-]+)/;
 
-     my $p = lc $1;
+     my $p = $1;
      my $n = $dir . $dir_sep . $p;
 
      if(-d $n )

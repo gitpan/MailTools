@@ -16,7 +16,7 @@ use Mail::Header;
 use vars qw($VERSION);
 
 BEGIN {
-    $VERSION = "1.32";
+    $VERSION = "1.33";
     *AUTOLOAD = \&AutoLoader::AUTOLOAD;
 
     unless(defined &UNIVERSAL::isa) {
@@ -535,7 +535,7 @@ sub _prephdr {
 
     $hdr->replace('X-Mailer', "Perl5 Mail::Internet v" . $Mail::Internet::VERSION);
 
-    my $name = eval { (getpwuid($>))[6] } || $ENV{NAME} || "";
+    my $name = eval { local $SIG{__DIE__}; (getpwuid($>))[6] } || $ENV{NAME} || "";
 
     while($name =~ s/\([^\(\)]*\)//) { 1; }
 
@@ -573,7 +573,14 @@ use strict;
     my $smtp;
     my @hello = defined $opt{Hello} ? (Hello => $opt{Hello}) : ();
 
+    push(@hello, 'Port', $opt{'Port'})
+	if exists $opt{'Port'};
+
+    push(@hello, 'Debug', $opt{'Debug'})
+	if exists $opt{'Debug'};
+
     unless(defined($host)) {
+	local $SIG{__DIE__};
 	my @hosts = qw(mailhost localhost);
 	unshift(@hosts, split(/:/, $ENV{SMTPHOSTS})) if(defined $ENV{SMTPHOSTS});
 
@@ -587,6 +594,7 @@ use strict;
 	$noquit = 1;
     }
     else {
+	local $SIG{__DIE__};
 	$smtp = eval { Net::SMTP->new($host, @hello) };
     }
 
@@ -879,6 +887,14 @@ are given then the addresses are extracted from the message being sent.
 =item Hello
 
 Send a HELO (or EHLO) command to the server with the given name.
+
+=item Port
+
+Port number to connect to on remote host
+
+=item Debug
+
+Debug value to pass to Net::SMPT, see <Net::SMTP>
 
 =back
 

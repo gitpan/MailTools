@@ -9,14 +9,14 @@ $mcfile = "mailcap-$$";
 
 open(MAILCAP, ">$mcfile") || die "Can't create $mcfile: $!";
 
-print MAILCAP <<'EOT';
+print MAILCAP <<EOT;
 
 # This is a comment and should be ignored
 
-image/*; xv %s \; echo "Showing image %s"; description=Simple image format
+image/*; xv %s \\; echo "Showing image %s"; description=Simple image format
 
-text/plain; cat %s;\
-  test=perl -e "exit (!(q{%{charset}} =~ /^iso-8859-1$/i))";\
+text/plain; cat %s;\\
+  test=$^X -e "exit (!(q{%{charset}} =~ /^iso-8859-1\$/i))";\\
   copiousoutput
 
 text/plain; smartcat %s; copiousoutput

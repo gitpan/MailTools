@@ -121,7 +121,7 @@ use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 use Config;
 use strict;
 
-$VERSION = "1.19"; # $Id: //depot/MailTools/Mail/Mailer.pm#13 $
+$VERSION = "1.21"; # $Id: //depot/MailTools/Mail/Mailer.pm#13 $
 
 sub Version { $VERSION }
 
@@ -163,7 +163,7 @@ $MailerBinary = undef;
 
 # does this really need to be done? or should a default mailer be specfied?
 
-if($^O eq 'MacOS' || $^O eq 'VMS') {
+if($^O eq 'MacOS' || $^O eq 'VMS' || $^O eq 'MSWin32') {
     $MailerType = 'smtp';
     $MailerBinary = $Mailers{$MailerType};
 }
@@ -261,6 +261,7 @@ sub open {
     my($self, $hdrs) = @_;
     my $exe = *$self->{Exe}; # || Carp::croak "$self->open: bad exe";
     my $args = *$self->{Args};
+    _cleanup_hdrs($hdrs);
     my @to = $self->who_to($hdrs);
     
     $self->close;	# just in case;
@@ -275,6 +276,17 @@ sub open {
 
     # return self (a FileHandle) ready to accept the body
     $self;
+}
+
+
+sub _cleanup_hdrs {
+  my $hdrs = shift;
+  my $h;
+  foreach $h (values %$hdrs) {
+    foreach (ref($h) ? @{$h} : $h) {
+      s/\n//;
+    }
+  }
 }
 
 

@@ -16,8 +16,12 @@ sub set_headers {
 }
 
 sub exec {
-    open(STDOUT,">/dev/null"); # this is not portable !!!!
-    open(STDERR,">/dev/null"); # this is not portable !!!!
+    # These fail in FCGI under 5.6 due to 5.6 adding an OPEN to the
+    # tie interface and FCGI not having one.
+    eval {
+	open(STDOUT,">/dev/null"); # this is not portable !!!!
+	open(STDERR,">/dev/null"); # this is not portable !!!!
+    };
     shift->SUPER::exec(@_);
 }
 1;

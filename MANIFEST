@@ -1,7 +1,6 @@
 ChangeLog
 MANIFEST			This File
 Mail/Address.pm			Manipulation of electronic mail addresses
-Mail/Alias.pm			Read/Write various mail alias file formats
 Mail/Cap.pm			Read mailcap files
 Mail/Field.pm			
 Mail/Field/AddrList.pm		

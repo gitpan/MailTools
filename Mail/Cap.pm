@@ -140,7 +140,7 @@ sub new
 
 These methods invoke a suitable progam presenting or manipulating the
 media object in the specified file.  They all return C<1> if a command
-was found, and C<0> otherwise.  You might test C<$?" for the outcome
+was found, and C<0> otherwise.  You might test C<$?> for the outcome
 of the command.
 
 =cut

@@ -19,7 +19,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.17";
+$VERSION = "1.19";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -80,11 +80,23 @@ sub _tidy_header
 
 # fold the line to the given length
 
+my %STRUCTURE;
+@STRUCTURE{ map { lc } qw{
+  To Cc Bcc From Date Reply-To Sender
+  Resent-Date Resent-From Resent-Sender Resent-To Return-Path
+  list-help list-post list-unsubscribe Mailing-List
+  Received References Message-ID In-Reply-To
+  Content-Length Content-Type
+  Delivered-To
+  Lines
+  MIME-Version
+  Precedence
+  Status
+}} = ();
+
 sub _fold_line
 {
  my($ln,$maxlen) = @_;
-
- return if $_[0] =~ /^X-Face:/io;
 
  $maxlen = 20
     if($maxlen < 20);
@@ -100,23 +112,38 @@ sub _fold_line
 
  if(length($_[0]) > $ml)
   {
-   #Split the line up
-   # first bias towards splitting at a , or a ; >4/5 along the line
-   # next split a whitespace
-   # else we are looking at a single word and probably don't want to split
-   my $x = "";
-   $x .= $2 . "\n    "
-	while($_[0] =~ s/^(\s*(
-			    [^"]{$min,$max}?[\,\;]
-			   |[^"]{1,$max}[\s\n]
-			   |[^\s"]+[\s\n]
-			   |([^\s"]+("[^"]*")?)+[\s\n]
-			  ))
+   if ($_[0] =~ /^([-\w]+)/ and exists $STRUCTURE{ lc $1 } )
+    {
+     #Split the line up
+     # first bias towards splitting at a , or a ; >4/5 along the line
+     # next split a whitespace
+     # else we are looking at a single word and probably don't want to split
+     my $x = "";
+
+     $x .= "$1\n    "
+	while($_[0] =~ s/^\s*(
+			   [^"]{$min,$max}?[\,\;]
+			  |[^"]{1,$max}\s
+			  |[^\s"]*(?:"[^"]*"[^\s"]*)+\s
+			  |[^\s"]+\s
+			  )
 			//x);
-   $x .= $_[0];
-   $_[0] = $x;
-   $_[0] =~ s/(\A\s+|[\t ]+\Z)//sog;
-   $_[0] =~ s/\s+\n/\n/sog;
+     $x .= $_[0];
+     $_[0] = $x;
+     $_[0] =~ s/(\A\s+|[\t ]+\Z)//sog;
+     $_[0] =~ s/\s+\n/\n/sog;
+    }
+   else
+    {
+      my $dif = $max-$min;
+
+      $_[0] =~ s/(?:^|\G)
+		(?:
+		  (.{$min,$max})\s+
+		 |(.{$min,$max})
+		)
+                /$+\n    /xg;
+    }
   }
 
  $_[0] =~ s/\A(\S+)\n\s*(?=\S)/$1 /so; 
@@ -136,7 +163,7 @@ sub _tag_case
  # Change the case of the tag
  # eq Message-Id
  $tag =~ s/\b([a-z]+)/\L\u$1/gio;
- $tag =~ s/\b([b-df-hj-np-tv-z]+)\b/\U$1/gio
+ $tag =~ s/\b([b-df-hj-np-tv-z]+|MIME)\b/\U$1/gio
 	if $tag =~ /-/;
 
  $tag;

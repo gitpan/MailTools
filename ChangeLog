@@ -1,3 +1,68 @@
+Change 583 on 2000/09/04 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Address
+	- Remove some unneeded \'s in regex patterns (to keep 5.7.0 quiet)
+
+Change 582 on 2000/09/04 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Alias
+	- Removed. Now distributed separatly and maintained by
+	  Tom Zeltwanger (ZELT)
+
+Change 581 on 2000/09/04 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Remove newlines from the lines in the Mail::Header object
+
+Change 575 on 2000/08/24 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer::mail
+	- Fix problems with open(STDERR) when using under FCGI
+
+Change 571 on 2000/08/24 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Deafulr Win32 to smtp
+
+Change 521 on 2000/05/16 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Internet
+	- Added Debug and Port options to smtpsend
+
+Change 520 on 2000/05/16 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	- Another fix for badly formed headers in _fold_line
+	- get MIME right in _tag_case
+
+Change 519 on 2000/05/16 by <gbarr@pobox.com> (Graham Barr)
+
+	t/mailcap.t
+	- Do not assume user has perl in $PATH
+
+Change 502 on 2000/05/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Field
+	- readdir returns files in the correct case, duh!
+
+Change 501 on 2000/04/30 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Header
+	* Don't attempt to do a structured fold on non-structured header lines
+
+Change 498 on 2000/04/30 by <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Cap
+	- Fix pod typo
+
+Change 490 on 2000/04/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Remove test in t/internet.t that sends an Email
+
+Change 457 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.14
+
 Change 456 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
 
 	Makefile.PL
