@@ -1,8 +1,11 @@
 #
 
 package Mail::Cap;
+use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
+use vars qw($VERSION $useCache);
+
+$VERSION = "1.03";
 sub Version { $VERSION; }
 
 =head1 NAME
@@ -248,7 +251,8 @@ sub expandPercentMacros
     return $text unless defined $type;
     $file = "" unless defined $file;
     my($fulltype, @params) = split(/\s*;\s*/, $type);
-    my($type, $subtype) = split(/\//, $fulltype, 2);
+    my $subtype;
+    ($type, $subtype) = split(/\//, $fulltype, 2);
     my %params;
     for (@params) {
 	my($key,$val) = split(/\s*=\s*/, $_, 2);

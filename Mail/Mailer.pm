@@ -8,7 +8,8 @@ Mail::Mailer - Simple interface to electronic mailing mechanisms
 
 =head1 SYNOPSIS
 
-    require Mail::Mailer;
+    use Mail::Mailer;
+    use Mail::Mailer qw(mail);
 
     $mailer = new Mail::Mailer;
 
@@ -28,21 +29,15 @@ behaviour of a method by passing C<$command> to the C<new> method.
 
 =over 4
 
-=item C<sendmail>
-
-Use the C<sendmail> program to deliver the mail.  C<$command> is the
-path to C<sendmail>.
-
 =item C<mail>
 
 Use the Unix system C<mail> program to deliver the mail.  C<$command>
 is the path to C<mail>.
 
-=item C<telnet>
+=item C<sendmail>
 
-Telnet to the SMTP port of the local machine.  C<$command> is the path
-to the C<telnet> command.  C<$Mail::Mailer> calls C<$command localhost
-smtp>.
+Use the C<sendmail> program to deliver the mail.  C<$command> is the
+path to C<sendmail>.
 
 =item C<test>
 
@@ -50,6 +45,10 @@ Used for debugging, this calls C</bin/echo> to display the data.  No
 mail is ever sent.  C<$command> is ignored.
 
 =back
+
+C<Mail::Mailer> will search for executables in the above order. The
+default mailer will be the first one found. In the case of C<mail>
+Mail::Mailer will search for C<mail>, C<mailx> and C<Mail>.
 
 =head2 ARGUMENTS
 
@@ -82,22 +81,14 @@ Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
 For support please contact comp.lang.perl.misc.
 Small fix and documentation by Nathan Torkington <gnat@frii.com>.
 
-=head1 REVISION
-
-$Revision: 1.7 $
-
-The VERSION is derived from the revision turning each number after the
-first dot into a 2 digit number so
-
-	Revision 1.8   => VERSION 1.08
-	Revision 1.2.3 => VERSION 1.0203
-
 =cut
 
 use Carp;
 use FileHandle;
+use Symbol;
+use vars qw(@ISA $VERSION $MailerBinary $MailerType %Mailers @Mailers);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.07";
 sub Version { $VERSION }
 
 @ISA = qw(FileHandle);
@@ -114,20 +105,50 @@ push(@Mailers, split(/:/,$ENV{PERL_MAILERS})) if $ENV{PERL_MAILERS};
 %Mailers = @Mailers;
 
 $MailerBinary = undef;
-$gensym = "SYM000";
 
 # On solaris mail does not except ~ escapes, you must use mailx
 
-$Mailers{mail} = 'mailx'
-	if(is_exe('mailx'));
+use Config;
+
+if(is_exe('mailx')) {
+    my $cmd = 'mailx';
+    my $osname = $Config{osname};
+    if($osname =~ /solaris/io) {
+	$cmd .= " -~";
+    }
+    elsif($osname =~ /linux/io) {
+	$cmd .= " -i";
+    }
+    $Mailers{mail} = $cmd;
+}
+elsif(is_exe('Mail')) {
+    $Mailers{mail} = 'Mail';
+}
 
 # does this really need to be done? or should a default mailer be specfied?
-foreach $i ( 0..@Mailers ) {
-    next unless $i % 2;
+my $i;
+foreach $i ( 0..$#Mailers ) {
+    next if $i % 2;
     $MailerType = $Mailers[$i];
+    my $binary;
     if ($binary=is_exe($Mailers{$MailerType})) {
 	$MailerBinary = $binary;
 	last;
+    }
+}
+
+sub import {
+    shift;
+
+    if(@_) {
+	my $type = shift;
+	my $exe = shift || $Mailers{$type};
+
+        carp "Cannot locate '$exe'"
+            unless is_exe($exe);
+
+        $MailerType = $type;
+        $Mailers{$MailerType} = $exe;
     }
 }
 
@@ -140,21 +161,15 @@ sub to_array {
     }
 }
 
-sub gensym {
-    *{"Mail::Mailer::" . $gensym++};
-}
-sub ungensym {
-    local($x) = shift;
-    $x =~ s/.*:://;
-    delete $Mail::Mailer::{$x};
-}
 sub is_exe {
-    my $name = shift;
+    my $exe = shift;
     my $dir;
+    # remove any options
+    my $name = ($exe =~ /(\S+)/)[0];
     # check for absolute or relative path
-    return ($name) if (-x $name and ! -d $name and $name =~ m:/:);
+    return ($exe) if (-x $name and ! -d $name and $name =~ m:/:);
     foreach $dir (split(/:/, $ENV{PATH})) {
-	return "$dir/$name" if (-x "$dir/$name" && ! -d "$dir/$name");
+	return "$dir/$exe" if (-x "$dir/$name" && ! -d "$dir/$name");
     }
     0;
 }
@@ -171,7 +186,7 @@ sub new {
     croak "Mailer '$type' not known, please specify correct type"
 	unless $type;
 
-    local($glob) = &gensym;	# Make glob for FileHandle and attributes
+    local($glob) = gensym;	# Make glob for FileHandle and attributes
     %{*$glob} = (Exe 	=> $exe,
 		 Args	=> [ @args ]
 		);
@@ -203,7 +218,8 @@ sub open {
 sub exec {
     my($self, $exe, $args, $to) = @_;
     # Fork and exec the mailer (no shell involved to avoid risks)
-    exec($exe, @$args, @$to);
+    my @exe = split(/\s+/,$exe);
+    exec(@exe, @$args, @$to);
 }
 
 sub can_cc { 1 }	# overridden in subclass for mailer that can't
@@ -235,7 +251,6 @@ sub close {
 sub DESTROY {
     my $self = shift;
     $self->close;
-    ungensym($self);
 }
 
 ##

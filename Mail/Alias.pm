@@ -1,10 +1,67 @@
+# Mail::Alias.pm
 #
+# Copyright (c) 1995 Graham Barr <Graham.Barr@tiuk.ti.com>. All rights
+# reserved. This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+
 
 package Mail::Alias;
 
-use Carp;
+=head1 NAME
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
+Mail::Alias - maniulate mail alias files of various formats
+
+=head1 SYNOPSIS
+
+    use Mail::Alias;
+
+=head1 DESCRIPTION
+
+C<Mail::Alias> can read various formats of mail alias. Once an object has been
+created it can be used to expand aliases and output in another format.
+
+B<NOTE: This package is unfinished>
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ()
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item read ()
+
+=item write ()
+
+=item format ()
+
+=item exists ()
+
+=item expand ()
+
+=back
+
+=head1 AUTHOR
+
+Graham Barr <Graham.Barr@tiuk.ti.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
+
+=cut
+
+use Carp;
+use vars qw($VERSION);
+
+$VERSION = "1.04";
 sub Version { $VERSION }
 
 sub new {
@@ -57,12 +114,16 @@ sub expand {
 
 package Mail::Alias::Ucbmail;
 
+use vars qw(@ISA);
+
 @ISA = qw(Mail::Alias::Binmail);
 
 package Mail::Alias::Binmail;
 
 use Carp;
 use Mail::Address;
+
+use vars qw(@ISA);
 
 @ISA = qw(Mail::Alias);
 
@@ -120,6 +181,8 @@ package Mail::Alias::Sendmail;
 
 use Carp;
 use Mail::Address;
+
+use vars qw(@ISA);
 
 @ISA = qw(Mail::Alias);
 

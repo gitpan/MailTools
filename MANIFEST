@@ -1,15 +1,12 @@
 ChangeLog
-FAQ/apparently-to
 MANIFEST			This File
-Mail/Address.pm			(v1.08) Manipulation of electronic mail addresses
-Mail/Alias.pm			(v1.03) Read/Write various mail alias file formats
+Mail/Address.pm			(v1.09) Manipulation of electronic mail addresses
+Mail/Alias.pm			(v1.04) Read/Write various mail alias file formats
 Mail/Cap.pm			(v1.03) Read mailcap files
 Mail/Field.pm			(v1.02) 
 Mail/Field/Date.pm		(v1.01) 
-Mail/Header.pm			(v1.01) 
-Mail/Header.pm.html
-Mail/Internet.pm		(v1.23) Functions for RFC822 mail manipulations
-Mail/MIME.pm			(v1.04) Extends Mail::RFC822 to understand MIME
+Mail/Header.pm			(v1.05) 
+Mail/Internet.pm		(v1.25) Functions for RFC822 mail manipulations
 Mail/Mailer.pm			(v1.07) Simple mail agent interface
 Mail/Send.pm			(v1.04) Simple interface for sending mail
 Mail/Util.pm			(v1.10) Mail related utilities
@@ -21,3 +18,4 @@ bin/rplyto_demo.PL		example script to reply to a message
 bin/send_demo.PL		example script to send a message using sendmail
 t/extract.t
 t/mailcap.t
+t/require.t

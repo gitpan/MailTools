@@ -5,8 +5,11 @@
 # modify it under the same terms as Perl itself.
 
 package Mail::Util;
+use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.10 $ =~ /(\d+)\.(\d+)/);
+use vars qw($VERSION @ISA @EXPORT_OK);
+
+$VERSION = "1.10";
 sub Version { $VERSION }
 
 =head1 NAME
@@ -52,10 +55,6 @@ Graham Barr <bodg@tiuk.ti.com>
 Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
-
-=head1 REVISION
-
-$Revision: 1.10 $
 
 =cut
 

@@ -12,6 +12,7 @@
 #
 
 package Mail::Header;
+use strict;
 
 =head1 NAME
 
@@ -46,7 +47,7 @@ pairs, just like a hash table. Valid options are
 
 =over 8
 
-=item B<Reformat>
+=item B<Modify>
 
 If this value is I<true> then the headers will be re-formatted,
 otherwise the format of the header lines will remain unchanged.
@@ -72,39 +73,122 @@ The default length of line to be used when folding header lines
 
 =item modify ( [ VALUE ] )
 
+If C<VALUE> is I<false> then C<Mail::Header> will not do any automatic
+reformatting of the headers, other than to ensure that the line
+starts with the tags given.
+
 =item mail_from ( OPTION )
+
+C<OPTION> specifies what to do when a C<`From '> line is encountered.
+Valid values are C<IGNORE> - ignore and discard the header,
+C<ERROR> - invoke an error (call die), C<COERCE> - rename them as Mail-From
+and C<KEEP> - keep them.
 
 =item fold ( [ LENGTH ] )
 
+Fold the header. If C<LENGTH> is not given then C<Mail::Header> uses the
+following rules to determine what length to fold a line.
+
+The fold length for the tag that is begin processed
+
+The default fold length for the tag that is being processed
+
+The default fold length for the object
+
 =item extract ( ARRAY_REF )
+
+Extract a header from the given array. C<extract> B<will modify> this array.
+Returns the object that the method was called on.
 
 =item read ( FD )
 
+Read a header from the given file descriptor.
+
 =item empty ()
+
+Empty the C<Mail::Header> object of all lines.
 
 =item header ( [ ARRAY_REF ] )
 
+C<header> does multiple operations. First it will extract a header from
+the array, if gieven. It will the reformat the header, if reformatting
+is permitted, and finally return a reference to an array which
+contains the header in a printable form.
+
 =item add ( TAG, LINE [, INDEX ] )
+
+Add a new line to the header. If C<TAG> is I<undef> the the tag will be
+extracted from the beginning of the given line. If C<INDEX> is given
+the new line will be inserted into the header at the given point, otherwise
+the new line will be appended to the end of the header.
 
 =item replace ( TAG, LINE [, INDEX ] )
 
+Replace a line in the header.  If C<TAG> is I<undef> the the tag will be
+extracted from the beginning of the given line. If C<INDEX> is given
+the new line will replace the Nth instance of that tag, otherwise the
+first instance of the tag is replaced. If the tag does not appear in the
+header then a new line will be appended to the header.
+
 =item combine ( TAG [, WITH ] )
+
+Combine all instances of C<TAG> into one. The lines will be
+joined togther with C<WITH>, or a single space if not given. The new
+item will be positioned in the header where the first instance was, all
+other instances of <TAG> will be removed.
 
 =item get ( TAG [, INDEX ] )
 
-=item exists ( TAG )
+Get the text form a line. If C<INDEX> is given then the text of the Nth
+instance will be returned. If it is not given the return value depends on the
+context in which C<get> was called. In an array context a list of all the
+text from all the instances of C<TAG> will be returned. In a scalar context
+the text for the first instance will be returned.
 
 =item delete ( TAG [, INDEX ] )
 
+Delete a tag from the header. If C<INDEX> id given then the Nth instance
+of the tag will be removed. If C<INDEX> is not given all instances
+of tag will be removed.
+
+=item count ( TAG )
+
+Returns the number of times the given atg appears in the header
+
 =item print ( [ FD ] )
 
-=item fold_length ( [ LENGTH ] )
+Print the header to the given file descriptor, or C<STDOUT> if no
+file descriptor is given.
+
+=item fold_length ( [ TAG ], [ LENGTH ] )
+
+Set the default fold length for all tags or just one. With no arguments
+the default fold length is returned. With two arguments it sets the fold
+length for the given tag and returns the previous value. If only C<LENGTH>
+is given it sets the default fold length for the current object.
+
+In the two argument form C<fold_length> may be called as a static method,
+setting default fold lengths for tags that will be used by B<all>
+C<Mail::Header> objects. See the C<fold> method for
+a description on how C<Mail::Header> uses these values.
 
 =item tags ()
 
+Retruns an array of all the tags that exist in the header. Each tag will
+only appear in the list once. The order of the tags is not specified.
+
 =item dup ()
 
+Create a duplicate of the current object.
+
 =item cleanup ()
+
+Remove any header line that, other than the tag, only contains whitespace
+
+=item unfold ( [ TAG ] )
+
+Unfold all instances of the given tag so that they do not spread across
+multiple lines. IF C<TAG> is not given then all lines are unfolded.
 
 =back
 
@@ -118,25 +202,14 @@ Copyright (c) 1996 Graham Barr. All rights reserved. This program is free
 software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 
-=head1 REVISION
-
-$Revision: 1.1 $
-$Date: 1996/08/13 09:26:15 $
-
-The VERSION is derived from the revision turning each number after the
-first dot into a 2 digit number so
-
-	Revision 1.8   => VERSION 1.08
-	Revision 1.2.3 => VERSION 1.0203
-
 =cut
 
 require 5.002;
 
 use Carp;
-use vars qw($VERSION);
+use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.1 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.06";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -150,10 +223,10 @@ my %HDR_LENGTHS = ();
 #
 #     CHAR        =  <any ASCII character>        ; (  0-177,  0.-127.)
 #     CTL         =  <any ASCII control           ; (  0- 37,  0.- 31.)
-#
+#		      character and DEL>          ; (    177,     127.)
 # I have included the trailing ':' in the field-name
 #
-$FIELD_NAME = '[^\x00-\x1f\x80-\xff :]+:';
+$FIELD_NAME = '[^\x00-\x1f\x7f-\xff :]+:';
 
 ##
 ## Private functions
@@ -182,14 +255,16 @@ sub _tidy_header
 
  if($d)
   {
+   local $_;
+   my @del = ();
+
    while(($key,$ref) = each %{$me->{'mail_hdr_hash'}} )
     {
-     local $_;
-
-     @$ref = grep { ref($_) && defined $$_ } @$ref;
-     delete $me->{'mail_hdr_hash'}{$key}
-	unless @$ref;
+     push(@del, $key)
+	unless @$ref = grep { ref($_) && defined $$_ } @$ref;
     }
+
+   map { delete $me->{'mail_hdr_hash'}{$_} } @del;
   }
 }
 
@@ -237,7 +312,8 @@ sub _tag_case
  # Change the case of the tag
  # eq Message-Id
  $tag =~ s/\b([a-z]+)/\L\u$1/gio;
- $tag =~ s/\b([b-df-hj-np-tv-z]+)\b/\U$1/gio;
+ $tag =~ s/\b([b-df-hj-np-tv-z]+)\b/\U$1/gio
+	if $tag =~ /-/;
 
  $tag;
 }
@@ -290,8 +366,12 @@ sub _fmt_line
    unless(defined $ctag && $ctag =~ /\A($FIELD_NAME|From )/oi);
 
  # Ensure the line starts with tag
- $line =~ s/\A($ctag)?\s*/$ctag /i
-    if $modify || $line !~ /\A$ctag/i ;
+ if($modify || $line !~ /\A$ctag/i)
+  {
+   my $xtag;
+   ($xtag = $ctag) =~ s/\s*\Z//o;
+   $line =~ s/\A($ctag)?\s*/$xtag /i;
+  }
 
  my $maxlen = $me->{'mail_hdr_lengths'}{$tag}
 		|| $HDR_LENGTHS{$tag}
@@ -364,10 +444,12 @@ sub new
  my $arg = @_ % 2 ? shift : undef;
  my %arg = @_;
 
+ $arg{Modify} = delete $arg{Reformat} unless exists $arg{Modify};
+
  my %hash = (
 	mail_hdr_list     => [],
 	mail_hdr_hash     => {},
-	mail_hdr_modify   => delete $arg{Reformat} || 0,
+	mail_hdr_modify   => delete $arg{Modify} || 0,
 	mail_hdr_foldlen  => 79,
 	mail_hdr_lengths  => {}
 	);
@@ -440,7 +522,7 @@ sub fold
 
    foreach $ln (@$list)
     {
-     _fold_line($ln,$len)
+     _fold_line($$ln,$len)
         if defined $ln;
     }
   }
@@ -574,7 +656,7 @@ sub add
 {
  my $me = shift;
  my($tag,$text,$where) = @_;
-
+ my $line;
  ($tag,$line) = _fmt_line($me,$tag,$text);
 
  # Must have a tag and text to add
@@ -586,7 +668,8 @@ sub add
 
  _insert($me,$tag,$line,$where);
 
- return substr($line, length($tag) + 2);
+ $line =~ /^\S+\s/o;
+ return $';		# post-match
 }
 
 sub replace
@@ -617,7 +700,8 @@ TAG:
     }
   }
 
- return substr($line, length($tag) + 2);
+ $line =~ /^\S+\s*/o;
+ return $';		# post-match
 }
 
 sub combine
@@ -647,7 +731,8 @@ sub combine
    _tidy_header($me);
   }
 
- return substr($line, length($tag) + 2);
+ $line =~ /^\S+\s*/o;
+ return $';		# post-match
 }
 
 sub get
@@ -659,7 +744,8 @@ sub get
  return wantarray ? () : undef
     unless exists $me->{'mail_hdr_hash'}{$tag};
 
- my $l = length($tag) + 2;
+ my $l = length($tag);
+ $l += 2 unless $tag =~ / \Z/o;
 
  $idx = 0
     unless defined $idx || wantarray;
@@ -674,7 +760,7 @@ sub get
  return  map { substr($$_,$l) } @{$me->{'mail_hdr_hash'}{$tag}};
 }
 
-sub exists
+sub count
 {
  my $me = shift;
  my $tag = _tag_case(shift);
@@ -682,6 +768,12 @@ sub exists
  exists $me->{'mail_hdr_hash'}{$tag}
 	? scalar(@{$me->{'mail_hdr_hash'}{$tag}})
 	: 0;
+}
+
+sub exists
+{
+ carp "Depriciated use of Mail::Header::exists, use count" if $^W;
+ count(@_);
 }
 
 sub delete
@@ -693,7 +785,9 @@ sub delete
 
  if(defined $me->{'mail_hdr_hash'}{$tag})
   {
-   my $l = length($tag) + 2;
+   my $l = length($tag);
+   $l += 2 unless $tag =~ / \Z/o;
+
    if(defined $idx)
     {
      if(defined $me->{'mail_hdr_hash'}{$tag}[$idx])
@@ -801,14 +895,15 @@ sub cleanup
 {
  my $me = shift;
  my $d = 0;
- my $arr;
+ my $key;
 
- foreach $arr (values %{$me->{'mail_hdr_hash'}})
+ foreach $key (@_ ? @_ : keys %{$me->{'mail_hdr_hash'}})
   {
+   my $arr = $me->{'mail_hdr_hash'}{$key};
    my $ref;
    foreach $ref (@$arr)
     {
-     unless($$ref =~ /\A($FIELD_NAME|From )\s*\S/soi)
+     unless($$ref =~ /\A\S+\s+\S/soi)
       {
        $$ref = undef;
        $d++;

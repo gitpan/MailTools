@@ -5,6 +5,7 @@
 # modify it under the same terms as Perl itself.
 
 package Mail::Field;
+use strict;
 
 =head1 NAME
 
@@ -131,19 +132,6 @@ C<_header_pkg_name> subroutine in C<Mail::Field>
 
 Graham Barr <Graham.Barr@tiuk.ti.com>
 
-=head1 REVISION
-
-$Revision: 1.2 $
-
-The revision and the VERSION are not the same but the VERSION is derived
-from the revision number. This is because the revision number is not a real
-number. The method used for doing this is to turn each number after the first
-period into a 2 digit number with leading zeros and then removing all but the
-first period. For example
-
-	Revision 1.8   => VERSION 1.08
-	Revision 1.2.3 => VERSION 1.0203
-
 =head1 SEE ALSO
 
 L<MIME::*>s
@@ -166,7 +154,7 @@ use Carp;
 use strict;
 use vars qw($AUTOLOAD $VERSION);
 
-$VERSION = do{my @r=(q$Revision: 1.2 $=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.02";
 
 my %Register = ();	# method => package name translation
 my %Loaded   = ();	# loaded packages

@@ -5,6 +5,7 @@
 # modify it under the same terms as Perl itself.
 
 package Mail::Internet;
+use strict;
 
 =head1 NAME
 
@@ -12,14 +13,50 @@ Mail::Internet - manipulate Internet format (RFC 822) mail messages
 
 =head1 SYNOPSIS
 
-use Mail::Internet;
+    use Mail::Internet;
 
 =head1 DESCRIPTION
 
 This package provides a class object which can be used for reading, creating,
 manipulating and writing a message with RFC822 compliant headers.
 
-=head2 METHODS
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ( [ ARG ], [ OPTIONS ] )
+
+C<ARG> is optiona and may be either a file descriptor (reference to a GLOB)
+or a reference to an array. If given the new object will be
+initialized with headers either from the array of read from 
+the file descriptor.
+
+C<OPTIONS> is a list of options given in the form of key-value
+pairs, just like a hash table. Valid options are
+
+=over 8
+
+=item B<Header>
+
+The value of this option should be a C<Mail::Header> object. If given then
+C<Mail::Internet> will not attempt to read a mail header from C<ARG>, if
+it was specified.
+
+=item B<Body>
+
+The value of this option should be a reference to an array which contains
+the lines for the body of the message. If given then
+C<Mail::Internet> will not attempt to read the body from C<ARG>, if
+it was specified.
+
+=back
+
+The Mail::Header options C<Modify>, C<MailFrom> and C<FoldLength> may
+also be given.
+
+=back
+
+=head1 METHODS
 
 =over 4
 
@@ -49,7 +86,7 @@ message
 
 =head1 UTILITY METHODS
 
-The following methods are more a utility type that a manipulation
+The following methods are more a utility type than a manipulation
 type of method.
 
 =over 4
@@ -91,6 +128,16 @@ then C<mailhost> and C<localhost>.
 
 Post an article via NNTP, require News::NNTPClient.
 
+=item escape_from ()
+
+It can cause problems with some applications if a message contains a line
+starting with C<`From '>, in particular when attempting to split a folder.
+This method inserts a leading C<`>'> on anyline starting with C<`From '>
+
+=item unescape_from ()
+
+This method will remove the escaping added bu escape_from
+
 =back
 
 =head1 SEE ALSO
@@ -101,16 +148,6 @@ L<Mail::Address>
 =head1 AUTHOR
 
 Graham Barr <Graham.Barr@tiuk.ti.com>
-
-=head1 REVISION
-
-$Revision: 1.23 $
-
-The VERSION is derived from the revision turning each number after the
-first dot into a 2 digit number so
-
-	Revision 1.8   => VERSION 1.08
-	Revision 1.2.3 => VERSION 1.0203
 
 =head1 COPYRIGHT
 
@@ -127,8 +164,7 @@ use AutoLoader;
 use Mail::Header;
 use vars qw($VERSION @ISA);
 
-# This one will turn 1.2 => 1.02 and 1.2.3 => 1.0203 and so on ...
-$VERSION = do{my @r=(q$Revision: 1.23 $=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.26";
 @ISA     = qw(AutoLoader);
 
 # stop import being inherited from AutoLoader by use Mail::Internet :-(
@@ -138,38 +174,30 @@ sub new
 {
  my $self = shift;
  my $type = ref($self) || $self;
+ my $arg = @_ % 2 ? shift : undef;
+ my %arg = @_;
 
  my $me = bless {}, $type;
 
- my $arr  = [];
- my ($line,$buffer);
- my $fd = undef;
+ $me->{'mail_inet_head'} = $arg{Header} if exists $arg{Header};
+ $me->{'mail_inet_body'} = $arg{Body} if exists $arg{Body};
 
- $me->head->fold_length(79); # Default fold length
+ $me->head->fold_length(delete $arg{FoldLength} || 79); # Default fold length
+ $me->head->mail_from($arg{MailFrom}) if exists $arg{MailFrom};
+ $me->head->modify(exists $arg{Modify} ? $arg{Modify} : 1);
 
- @{$arr} = @_ if(scalar(@_) > 1);
-
- if(scalar(@_) == 1)
+ if(defined $arg)
   {
-   if(ref($_[0]) eq 'ARRAY')
+   if(ref($arg) eq 'ARRAY')
     {
-     @{$arr} = @{$_[0]};
+     $me->header($arg) unless exists $arg{Header};
+     $me->body($arg) unless exists $arg{Body};
     }
-   elsif(defined fileno($fd = $_[0]))
+   elsif(defined fileno($arg))
     {
-     undef $arr;
+     $me->read_header($arg) unless exists $arg{Header};
+     $me->read_body($arg) unless exists $arg{Body};
     }
-  }
-
- if(defined $arr)
-  {
-   $me->header($arr);
-   $me->body($arr);
-  } 
- else
-  {
-   $me->read_header($fd);
-   $me->read_body($fd);
   }
 
  return $me;
@@ -226,7 +254,6 @@ sub read_header
 {
  my $me = shift;
  my $head = $me->head;
-
  $head->read(@_);
  $head->header();
 }
@@ -248,10 +275,9 @@ sub add
  my $me = shift;
  my $head = $me->head;
  my $ret;
-
  while(@_)
   {
-   ($tag,$line) = splice(@_,0,2);
+   my ($tag,$line) = splice(@_,0,2);
 
    $ret = $head->add($tag,$line,-1) or
 	return undef;
@@ -268,7 +294,7 @@ sub replace
 
  while(@_)
   {
-   ($tag,$line) = splice(@_,0,2);
+   my ($tag,$line) = splice(@_,0,2);
 
    $ret = $head->replace($tag,$line,0) or
 	return undef;
@@ -287,10 +313,10 @@ sub get
  foreach $tag (@_)
   {
    last
-	if push(@val, $head->get($tag)) && !wantarray;
+	if push(@ret, $head->get($tag)) && !wantarray;
   }
 
- wantarray ? @val : shift @val;
+ wantarray ? @ret : shift @ret;
 }
 
 sub delete
@@ -378,7 +404,6 @@ sub remove_sig
   }
 }
 
-
 sub tidy_body
 {
  my $me = shift;
@@ -433,8 +458,8 @@ use Mail::Address;
 
  # Locate who we are sending to
  $to = $me->get('Reply-To')
-       || $me->get('Return-Path')
        || $me->get('From')
+       || $me->get('Return-Path')
        || "";
 
  # Mail::Address->parse returns a list of refs to a 2 element array
@@ -652,9 +677,9 @@ use Net::SMTP;
    $mail->add($tag,$from) unless($mail->get($tag));
   }
 
- # An original message should not have any Recieved lines
+ # An original message should not have any Received lines
 
- $mail->delete('Recieved');
+ $mail->delete('Received');
 
  # Who is it to
 
@@ -664,7 +689,6 @@ use Net::SMTP;
  return () unless(@addr);
 
  $mail->delete('Bcc'); # Remove blind Cc's
- $mail->clean_header;
 
  # Send it
 
@@ -695,7 +719,6 @@ require News::NNTPClient;
 
  my $art = $mail->dup;
 
- $art->clean_header;
  $art->replace('X-Mailer', "Perl5 Mail::Internet v" . $Mail::Internet::VERSION);
 
  unless($art->get('From'))
@@ -707,7 +730,6 @@ require News::NNTPClient;
 
  # Remove these incase the NNTP host decides to mail as well as me
  $art->delete(qw(To Cc Bcc)); 
- $art->clean_header;
 
  my $news = new News::NNTPClient;
  $news->post(@{$art->header},"\n",@{$art->body});
@@ -718,6 +740,25 @@ require News::NNTPClient;
  return 240 == $code ? @groups : ();
 }
 
+sub escape_from
+{
+ my $me = shift;
+
+ my $body = $me->body;
+ local $_;
+
+ scalar grep { s/\A(>*From) />$1 /o } @$body;
+}
+
+sub unescape_from
+{
+ my $me = shift;
+
+ my $body = $me->body;
+ local $_;
+
+ scalar grep { s/\A>(>*From) /$1 /o } @$body;
+}
 
 1; # keep require happy
 

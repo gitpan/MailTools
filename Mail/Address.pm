@@ -5,6 +5,7 @@
 # modify it under the same terms as Perl itself.
 
 package Mail::Address;
+use strict;
 
 =head1 NAME
 
@@ -12,69 +13,94 @@ Mail::Address - Parse mail addresses
 
 =head1 DESCRIPTION
 
-Parse mailcap files as specified in RFC 822 - I<Standard for ARPA Internet
-Text Messages>.
+C<Mail::Address> extracts and manipulates RFC822 compilant email
+addresses. As well as being able to create C<Mail::Address> objects
+in the normal manner, C<Mail::Address> can extract addresses from
+the To and Cc lines found in an email message.
 
 =head1 CONSTRUCTORS
 
-=head2 new($phrase, $address, [ $comment])
+=over 4
+
+=item new( PHRASE,  ADDRESS, [ COMMENT ])
 
  Mail::Address->new("Perl5 Porters", "perl5-porters@africa.nicoh.com");
 
 Create a new object which represent an address with the elements given. In
 a message these 3 elements would be seen like:
 
- $phrase <$address> ($comment)
- $address ($comment)
+ PHRASE <ADDRESS> (COMMENT)
+ ADDRESS (COMMENT)
 
-=head2 parse($line)
+=item parse( LINE )
 
  Mail::Address->parse($line);
 
- Parse the given line a return a list of extracted objects. The line would
- normally be one taken from a To,Cc or Bcc line in a message
+Parse the given line a return a list of extracted objects. The line would
+normally be one taken from a To,Cc or Bcc line in a message
+
+=back
 
 =head1 METHODS
 
-=head2 phrase()
+=over 4
 
-=head2 address()
+=item phrase ()
 
-=head2 comment()
+Return the phrase part of the object.
 
-These methods each return one part of the object
+=item address ()
 
-=head2 format()
+Return the address part of the object.
+
+=item comment ()
+
+Return teh comment part of the object
+
+=item format ()
 
 Return a string representing the address in a suitable form to be placed
 on a To,Cc or Bcc line of a message
 
-=head2 name()
+=item name ()
 
 Using the information contained within the object attempt to identify what
-the perons or groups name is
+the person or groups name is
 
-=head2 host()
+=item host ()
 
 Return the address excluding the user id and '@'
 
-=head2 host()
+=item user ()
 
 Return the address excluding the '@' and the mail domain
 
-=head2 path()
+=item path ()
 
-Unimplemented yet but shoud return the UUCP path for the message
+Unimplemented yet but should return the UUCP path for the message
 
-=head2 canon()
+=item canon ()
 
-Unimplemented yet but shoud return the UUCP canon for the message
+Unimplemented yet but should return the UUCP canon for the message
+
+=back
+
+=head1 AUTHOR
+
+Graham Barr <Graham.Barr@tiuk.ti.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 1995 Graham Barr. All rights reserved. This program is free
+software; you can redistribute it and/or modify it under the same terms
+as Perl itself.
 
 =cut
 
 use Carp;
+use vars qw($VERSION);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.8 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.09";
 sub Version { $VERSION }
 
 #
@@ -287,9 +313,9 @@ sub name {
  my $phrase = $me->phrase;
  my $addr = $me->address;
 
- $phrase = $me->comment unless(length($phrase));
+ $phrase = $me->comment unless(defined($phrase) && length($phrase));
 
- $name = _extract_name($phrase);
+ my $name = _extract_name($phrase);
  
  if($name eq '' && $addr =~ /([^\%\.\@\_]+([\.\_][^\%\.\@\_]+)+)[\@\%]/o)	# first.last@domain address
   {

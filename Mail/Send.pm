@@ -1,5 +1,7 @@
 #
 package Mail::Send;
+use strict;
+
 require Mail::Mailer;
 
 use Carp;
@@ -38,8 +40,6 @@ Mail::Send - Simple electronic mail interface
 
 =head1 DESCRIPTION
 
-$Revision: 1.4 $
-
 =head1 SEE ALSO
 
 Mail::Mailer
@@ -52,7 +52,9 @@ For support please contact comp.lang.perl.misc.
 
 =cut
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+use vars qw($VERSION);
+
+$VERSION = "1.04";
 sub Version { $VERSION }
 
 sub new {
