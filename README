@@ -9,6 +9,8 @@ You install the library by running these commands:
    make test
    make install
 
+There are also some demo scripts (see README.demos)
+
 Please report any bugs/suggestions to Graham Barr <bodg@tiuk.ti.com>
 
 All files contained in this installation are Copyright (c) 1995 Graham Barr

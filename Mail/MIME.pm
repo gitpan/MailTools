@@ -6,11 +6,11 @@
 
 package Mail::MIME;
 
-require Mail::RFC822;
+require Mail::Internet;
 
-@ISA = qw(Mail::RFC822);
+@ISA = qw(Mail::Internet);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 =head1 SYNOPSIS
@@ -69,7 +69,7 @@ sub print_body {
 sub empty {
  my $me = shift;
 
- $me->Mail::RFC822::empty();
+ $me->Mail::Internet::empty();
 
  delete $me->{MIMEBody};
 }

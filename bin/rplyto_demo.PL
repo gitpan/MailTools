@@ -1,38 +1,31 @@
-# This -*- perl -*- script makes the forwd_demo script
-# $Id: rplyto_demo.PL,v 1.1 1995/10/18 09:13:28 a909937 Exp $
+# This -*- perl -*- script makes the rplyto_demo script
+# $Id: rplyto_demo.PL,v 1.2 1995/11/21 08:20:16 gbarr Exp $
 
 $script = "bin/rplyto_demo";
 
 use Config;
+use Cwd;
 unlink($script);
 open MIR, ">$script" or die "open for writing $script: $!";
 print MIR "#!$Config{'scriptdir'}/perl -w\n";
+$cwd = Cwd::getcwd();
+print MIR "use lib qw($cwd/blib);\n";
 print MIR <DATA>; 
 chmod(0755, $script);
 
 __DATA__
-use lib qw(./lib);
-use Mail::RFC822;
-use Getopt::Std;
+use Mail::Internet;
 
-getopts('as');
-
-$reply_all = (defined $opt_s) ? 0 : 1;
-
-@line = <>;
-
-$mail = Mail::RFC822->new(\@line);
-$rply = $mail->reply();
-
-$rply->delete("Cc") unless($reply_all);
+$mail = Mail::Internet->new([<>]);
+$rply = $mail->reply(Keep => [qw(Newsgroups)]);
 
 $file = "/tmp/reply.$$";
 
-open(\*file,">$file") || die "Cannot open $file:$!\n";
+open(REPLY,">$file") || die "Cannot open $file:$!\n";
 
-$rply->print(\*file);
+$rply->print(\*REPLY);
 
-close(\*file);
+close(REPLY);
 
 $editor = $ENV{"EDITOR"} || die "\$EDITOR not defined\n";
 
@@ -42,4 +35,5 @@ warn "$editor :$!\n" if (system("$editor $file"));
 unlink($file,$file . '%',$file . '~');
 
 exit 0;
+
 

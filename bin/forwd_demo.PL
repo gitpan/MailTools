@@ -1,22 +1,24 @@
 # This -*- perl -*- script makes the forwd_demo script
-# $Id: forwd_demo.PL,v 1.1 1995/10/18 09:13:28 a909937 Exp $
+# $Id: forwd_demo.PL,v 1.2 1995/11/21 08:20:16 gbarr Exp $
 
 $script = "bin/forwd_demo";
 
 use Config;
+use Cwd;
 unlink($script);
 open MIR, ">$script" or die "open for writing $script: $!";
 print MIR "#!$Config{'scriptdir'}/perl -w\n";
+$cwd = Cwd::getcwd();
+print MIR "use lib qw($cwd/blib);\n";
 print MIR <DATA>; 
 chmod(0755, $script);
 
 __DATA__
-use lib qw(./blib ./lib);
-use Mail::RFC822;
+use Mail::Internet;
 
 @mail = <>;
 
-$mail = Mail::RFC822->new(\@mail);
+$mail = Mail::Internet->new(\@mail);
 
 $mail->remove_sig;
 $mail->tidy_body;
@@ -27,7 +29,7 @@ if(open(HDR,"$ENV{HOME}/.mailhdr")) {
  close(HDR);
 }
 
-$rply = Mail::RFC822->new(\@reply);
+$rply = Mail::Internet->new(\@reply);
 
 $subject = $mail->get('Subject');
 
@@ -37,7 +39,7 @@ $rply->replace('Subject',$subject);
 
 $rply->body($body = $mail->body);
 
-unshift @{$body},"---------- Begin Included Message ----------\n",
+unshift @{$body},"---------- Begin Included Message ----------\n";
 push    @{$body},"----------- End Included Message -----------\n";
 
 $file = "/tmp/reply.$$";

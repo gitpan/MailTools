@@ -1,67 +1,71 @@
 # This -*- perl -*- script makes the Makefile
-# $Id$
+# $Id: Makefile.PL,v 1.4 1995/11/21 08:47:51 gbarr Exp $
 
 use ExtUtils::MakeMaker;
 use ExtUtils::Manifest qw(maniread);
 
+#--- Configuration section ---
+
+#--- End User Configuration - You should not have to change anything below this line
+
+require 5.001;
+
+$VERSION  = "1.04";
+$NAME     = 'Mail';
+$DISTNAME = 'MailTools';
+
+%chk_install =  (Net::SMTP   => [1.03, 0],
+		 Net::Domain => [1.05, 0]
+		);
+
+#--- End Configuration
+
 sub check_installation {
- my $must = shift;
  my %pkg = @_;
+ my $abort = 0;
  my $pkg;
- foreach $pkg (keys %pkg) {
-  eval "require $pkg;";
 
-  my $rec_ver = sprintf("%.02f",$pkg{$pkg});
+ print "Checking your installation ...\n";
 
-  if(!defined ${$pkg . "::VERSION"}) {
-   if($must) {
-    die "
-*** You require $pkg version $rec_ver or later before you can
-    use this installation
+ foreach $pkg (keys %pkg) 
+  {
+   { eval "package dummy; require $pkg"; }
 
-";
-   }
-   else {
-    warn "
-*** I recommend $pkg version $rec_ver or later, which is missing from your
-    installation
+   my $ins_ver;
+   my($version,$must) = @{$pkg{$pkg}};
+   $version = sprintf("%.02f",$version);
 
-";
-   }
+   $ins_ver = defined ${$pkg . "::VERSION"}
+                ? sprintf("%.02f",${$pkg . "::VERSION"})
+                : undef;
+
+   printf " %s %s, ",$pkg, (defined $ins_ver ? "Found v" . $ins_ver
+                                             : "NOT FOUND");
+
+   $ins_ver = "0.00" unless(defined $ins_ver);
+
+   if($ins_ver < $version)
+    {
+     $abort += $must;
+     printf "%s v%s\n", $must ? "REQUIRE " : "Recommend ", $version;
+    }
+   else
+    {
+     print "OK\n";
+    }
   }
-  elsif(${$pkg . "::VERSION"} < $pkg{$pkg}) {
-   my $ins_ver = sprintf("%.02f",${$pkg . "::VERSION"});
 
-   if($must) {
-    die "
-*** You require $pkg version $rec_ver or later before you can
-    use this installation, your installation contains version $ins_ver
+ die "Abort\n" if $abort;
 
-";
-   }
-   else {
-    warn "
-*** I recommend $pkg version $rec_ver or later, your installation
-    contains $pkg version $ins_ver
-
-";
-   }
-  }
- }
+ print "Done.\n";
 }
 
 sub initialize {
  local($_);
 
- check_installation(0,
-                    Net::SMTP    => 1.03
-                   );
+ check_installation(%chk_install);
 
  my $manifest = maniread();
-
- $Version = "0.00";
-
- eval { require "./History" };
 
  my %pl_files = ();
  my @exe_files = ();
@@ -72,33 +76,23 @@ sub initialize {
  }
 
  %hash = (
-	VERSION   => $Version,
-	NAME      => 'Mail',
-	DISTNAME  => 'MailTools', 
+	VERSION   => $VERSION,
+	NAME      => $NAME,
+	DISTNAME  => $DISTNAME,
 	SKIP      => [qw(static dynamic)],
 	PL_FILES  => \%pl_files,
 	EXE_FILES => \@exe_files,
-
-	'dist'    => {COMPRESS => 'gzip -9f',
-		      SUFFIX   => 'gz', 
-		      DIST_DEFAULT => 'all tardist'
+	dist      => {COMPRESS     => 'gzip -9f',
+		      SUFFIX       => 'gz',
+		      DIST_DEFAULT => 'all tardist',
+		      CI           => 'ci -l'
 		     },
-
-	'linkext' => {LINKTYPE => '' },
-	'clean'   => {FILES => '*% *.html *.bak *.old lib/*% lib/*/*% $(EXE_FILES)'},
+	linkext   => {LINKTYPE => ''},
+	clean     => {FILES => '*% *.html *.bak *.old lib/*% lib/*/*% $(EXE_FILES)'},
  );
 
  \%hash;
 }
-
-
-if ($ExtUtils::MakeMaker::Version < 4.17) {
-    initialize();
-} else {
-    $hash{CONFIGURE} = \&initialize;
-}
-
-WriteMakefile(%hash);
 
 sub MY::test {
     q{
@@ -116,4 +110,11 @@ sub MY::libscan {
     return '' if m/\.(orig|rej)$/;
     $_;
 }
+
+# -- Make the Makefile
+
+die "You require MakeMaker v4.17 or later to install this package\n"
+   unless($ExtUtils::MakeMaker::Version >= 4.17);
+
+WriteMakefile(CONFIGURE => \&initialize);
 

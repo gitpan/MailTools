@@ -6,7 +6,7 @@
 
 package Mail::Util;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.8 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 
@@ -23,27 +23,31 @@ the calling package.
 =cut
 
 require 5.000;
-require AutoLoader;
+use AutoLoader;
 require Exporter;
-require POSIX;
 use Carp;
 
 @ISA = qw(Exporter AutoLoader);
 
-@EXPORT_OK = qw(read_mbox maildomain mailaddress);
+@EXPORT_OK = qw(read_mbox maildomain mailaddress smtpsend);
 
 1;
 
 __END__
 
+sub read_mbox;
+
 =head2 read_mbox( $file )
 
-Read C<$file>, a binmail mailbox file, and return a list of Mail::RFC822
+Read C<$file>, a binmail mailbox file, and return a list of Mail::Internet
 objects.
 
 =cut
 
-sub read_mbox {
+use FileHandle;
+require POSIX;
+
+ sub read_mbox {
  my $file  = shift;
  my $fd    = FileHandle->new($file,"r") || croak "cannot open '$file': $!\n";
  my @mail  = ();
@@ -76,10 +80,10 @@ sub read_mbox {
 Attempt to determine the current uers mail domain string via the following
 methods
 
- Look for a sendmail.cf file and extract DH paramter
+ Look for a sendmail.cf file and extract DH parameter
  Look for a smail config file and usr the first host defined in hostname(s)
  Try an SMTP connect (if Net::SMTP exists) first to mailhost then localhost
- Use Sys::Hostname . "." . Sys::Domainname
+ Use value from Net::Domain::domainname (if Net::Domain exists)
 
 =cut
 
@@ -131,35 +135,38 @@ sub maildomain {
  ##
 
  if(eval "require Net::SMTP") {
+  my $host;
 
-  my $smtp = Net::SMTP->new("mailhost");
-  
-  $smtp = Net::SMTP->new("localhost") unless(defined $smtp);
+  foreach $host (qw(mailhost localhost)) {
+   my $smtp = eval { Net::SMTP->new($host) };
 
-  if(defined $smtp) {
-   $domain = $smtp->domain;
-   $smtp->quit;
+   if(defined $smtp) {
+    $domain = $smtp->domain;
+    $smtp->quit;
+    last;
+   }
   }
  }
 
  ##
- ## Use internet domain name, if it can be found
+ ## Use internet(DNS) domain name, if it can be found
  ##
 
  unless(defined $domain) {
-  if(eval "require Sys::Domainname" && eval "require Sys::Hostname") {
-   my $host = (split(/\./,Sys::Hostname::hostname()))[0];
-
-   $domain = $host . "." . Sys::Domainname::domainname();
+  if(eval "require Net::Domain") {
+   $domain = Net::Domain::domainname();
   }
  }
+
+ $domain = "localhost" unless(defined $domain);
 
  return $domain;
 }
 
 =head2 mailaddress()
 
-Return a guess at the current users mail address.
+Return a guess at the current users mail address. The user can force
+the return value by setting C<$ENV{MAILADDRESS}>
 
 =cut
 
@@ -172,20 +179,22 @@ sub mailaddress {
  return $mailaddress if(defined $mailaddress);
 
  ##
- ## first look for $ENV{MAILADDRESS}
+ ## Get user name from environment
  ##
 
- return $mailaddress = $ENV{MAILADDRESS} if(defined $ENV{MAILADDRESS});
+ $mailaddress = $ENV{MAILADDRESS} ||
+                $ENV{USER} ||
+                $ENV{LOGNAME} ||
+                (getpwuid($>))[6] ||
+                "postmaster";
 
  ##
- ## Default to user name and maildomain
+ ## Add domain if it does not exist
  ##
 
- maildomain() unless(defined $domain);
+ $mailaddress .= "@" . maildomain() unless($mailaddress =~ /\@/);
 
- my $user = $ENV{USER} || $ENV{LOGNAME} || "";
-
- $mailaddress = $user . "@" . $domain;
+ $mailaddress;
 }
 
 =head1 AUTHOR
@@ -200,7 +209,7 @@ as Perl itself.
 
 =head1 REVISION
 
-$Revision: 1.5 $
+$Revision: 1.8 $
 
 =cut
 

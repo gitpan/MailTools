@@ -13,16 +13,18 @@ $i = 1;
 foreach $ln (@line) {
  next unless($ln =~ /\S/);
 
- ($test,$format,$name) = (split(/\t/,$ln),"","");
+ ($test,$format,$name) = (split(/\t/,$ln),"","","");
 
  $q = (Mail::Address->parse($test))[0];
 
- if($q->name eq $name && $q->format eq $format) {
+ $ename = $q->name || "";
+ $eformat = $q->format || "";
+ if($ename eq $name && $eformat eq $format) {
   print "ok ",$i,"\n";
  }
  else {
   print "not ok ",$i,"\n";
-  warn $test . "\t" . $q->format . "\t" . $q->name . "\n";
+#  warn "\n" . $test . "\n" . $eformat . "\n" . $ename. "\n" . $format . "\n" . $name . "\n\n";
  }
 
  $i++;
@@ -38,16 +40,16 @@ bodg fred@tiuk.ti.com	bodg
 m-sterni@mars.dsv.su.se 	m-sterni@mars.dsv.su.se	
 jrh%cup.portal.com@portal.unix.portal.com 	jrh%cup.portal.com@portal.unix.portal.com	Cup Portal Com
 astrachan@austlcm.sps.mot.com ('paul astrachan/xvt3') 	astrachan@austlcm.sps.mot.com ('paul astrachan/xvt3')	Paul Astrachan
-TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD) 	TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD)	James R Twine
+TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD) 	TWINE57%SDELVB.decnet@SNYBUFVA.CS.SNYBUF.EDU (JAMES R. TWINE - THE NERD)	James R Twine - The Nerd
 David Apfelbaum <da0g+@andrew.cmu.edu>	David Apfelbaum <da0g+@andrew.cmu.edu>	David Apfelbaum
-"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU> 	"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU>	James R Twine
+"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU> 	"JAMES R. TWINE - THE NERD" <TWINE57%SDELVB%SNYDELVA.bitnet@CUNYVM.CUNY.EDU>	James R Twine - The Nerd
 bilsby@signal.dra (Fred C. M. Bilsby)	bilsby@signal.dra (Fred C. M. Bilsby)	Fred C M Bilsby
 /G=Owen/S=Smith/O=SJ-Research/ADMD=INTERSPAN/C=GB/@mhs-relay.ac.uk	/G=Owen/S=Smith/O=SJ-Research/ADMD=INTERSPAN/C=GB/@mhs-relay.ac.uk	Owen Smith
 apardon@rc1.vub.ac.be (Antoon Pardon)	apardon@rc1.vub.ac.be (Antoon Pardon)	Antoon Pardon
 "Stephen Burke, Liverpool" <BURKE@vxdsya.desy.de>	"Stephen Burke, Liverpool" <BURKE@vxdsya.desy.de>	Stephen Burke
 Andy Duplain <duplain@btcs.bt.co.uk>	Andy Duplain <duplain@btcs.bt.co.uk>	Andy Duplain
 Gunnar Zoetl <zoetl@isa.informatik.th-darmstadt.de>	Gunnar Zoetl <zoetl@isa.informatik.th-darmstadt.de>	Gunnar Zoetl
-The Newcastle Info-Server <info-admin@newcastle.ac.uk>	The Newcastle Info-Server <info-admin@newcastle.ac.uk>	The Newcastle Info
+The Newcastle Info-Server <info-admin@newcastle.ac.uk>	The Newcastle Info-Server <info-admin@newcastle.ac.uk>	The Newcastle Info-Server
 wsinda@nl.tue.win.info (Dick Alstein)	wsinda@nl.tue.win.info (Dick Alstein)	Dick Alstein
 mserv@rusmv1.rus.uni-stuttgart.de (RUS Mail Server)	mserv@rusmv1.rus.uni-stuttgart.de (RUS Mail Server)	Rus Mail Server
 Suba.Peddada@eng.sun.com (Suba Peddada [CONTRACTOR])	Suba.Peddada@eng.sun.com (Suba Peddada [CONTRACTOR])	Suba Peddada

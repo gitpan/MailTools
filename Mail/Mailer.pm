@@ -23,7 +23,7 @@ Mail::Mailer - Simple interface to electronic mailing mechanisms
 
 =head1 DESCRIPTION
 
-$Revision: 1.4 $
+$Revision: 1.5 $
 
 =head1 TO DO
 
@@ -47,7 +47,7 @@ Tim Bunce <Tim.Bunce@ig.co.uk>, with a kick start from Graham Barr
 use Carp;
 use FileHandle;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 @ISA = qw(FileHandle);
@@ -58,7 +58,7 @@ sub Version { $VERSION }
     'telnet'		=> 'smtp',
     'test'		=> 'test',
 );
-push(@Mailers, split(/:/,$ENV{PERL_MALIERS})) if $ENV{PERL_MALIERS};
+push(@Mailers, split(/:/,$ENV{PERL_MAILERS})) if $ENV{PERL_MAILERS};
 %Mailers = @Mailers;
 
 $MailerBinary = undef;

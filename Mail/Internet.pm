@@ -1,31 +1,29 @@
-# Mail::RFC822.pm
+# Mail::Internet.pm
 #
 # Copyright (c) 1995 Graham Barr <Graham.Barr@tiuk.ti.com>. All rights
 # reserved. This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
-package Mail::RFC822;
+package Mail::Internet;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.8 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.17 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 =head1 SYNOPSIS
 
-use Mail::RFC822;
+use Mail::Internet;
 
 =head1 DESCRIPTION
 
 This package provides a class object which can be used for reading, creating,
 manipulating and writing a message with RFC822 compliant headers.
 
-=head1 NOTE: C<This Documentation is VERY incomplete>
-
 =cut
 
 require 5.000;
 use Carp;
-use Mail::Address;
-
+use AutoLoader;
+@ISA = qw(AutoLoader);
 #
 # Pattern to match a RFC822 Feild name ( Extract from RFC #822)
 #
@@ -51,7 +49,7 @@ sub tidy_headers
  my $me = shift;
 
  # Remove any entries without tags & text
- $me->{Hdrs} = [grep(defined $_, @{$me->{Hdrs}})];
+ @{$me->{Hdrs}} = grep(defined $_, @{$me->{Hdrs}});
 }
 
 sub tag_case
@@ -75,7 +73,7 @@ sub tag_case
 
    # Change the case of the tag
    # eq Message-Id
-   $tag =~ s/\b([a-z])/\L\u$1/gi;
+   $tag =~ s/\b([a-z]+)/\L\u$1/gi;
 
    # Ensure the line starts with tag
    $line =~ s/\A(\Q$tag\E)?\s*/$tag /i if(defined $line);
@@ -129,13 +127,13 @@ sub fold
 
 =over 2
 
-=item * new
+=item new
 
 The new constructor accepts either an array or a reference to an array. It
 returns a blessed reference.
 
- Mail::RFC822->new( <> );       # Read message from STDIN
- Mail::RFC822->new( $arr_ref ); # Read message from @{$arr_ref}
+ Mail::Internet->new( <> );       # Read message from STDIN
+ Mail::Internet->new( $arr_ref ); # Read message from @{$arr_ref}
 
 =cut
 
@@ -215,7 +213,7 @@ sub empty {
 
 =over 2
 
-=item * body()
+=item body()
 
 Returns the body of the message. This is a reference to an array.
 Each entry in the array represents a single line in the message.
@@ -233,7 +231,7 @@ sub body {
  return $body;
 }
 
-=item * header()
+=item header()
 
 Returns a reference to an array of folded header fields.
 
@@ -261,7 +259,7 @@ sub header {
 }
 
 
-=item * add ( $tag, $line [, $tag, $line [,...]])
+=item add ( $tag, $line [, $tag, $line [,...]])
 
 Adds a new entry to the header. I<$tag>: I<$line>.
 
@@ -287,7 +285,7 @@ sub add
  return substr($line, length($tag) + 1);
 }
 
-=item * replace( $tag, $line [, $tag, $line [,...]] )
+=item replace( $tag, $line [, $tag, $line [,...]] )
 
 Replaces the first header entry I<$tag> with I<$line> or adds a new entry if 
 I<$tag> does not exists. 
@@ -329,7 +327,7 @@ TAG:
  return substr($line, length($tag) + 1);
 }
 
-=item * combine( $tag [, $with] )
+=item combine( $tag [, $with] )
 
 Combines all occurences of I<$tag> in the header into one entry. If I<$with>
 is defined then the lines are joind with I<$with> between them, otherwise a
@@ -370,7 +368,7 @@ sub combine
  return defined $line ? substr($line, length($tag) + 1) : undef;
 }
 
-=item * get ( $tag [, $tag [, ...]] )
+=item get ( $tag [, $tag [, ...]] )
 
 Gets tags from the header.
 
@@ -408,7 +406,7 @@ sub get
  return wantarray ? @val : $val[0];
 }
 
-=item * delete( $tag )
+=item delete( $tag )
 
 Deletes all occurences of I<$tag> in the header.
 
@@ -420,35 +418,43 @@ sub delete
 {
  my $me  = shift;
  my $arg;
+ my @val = ();
 
  foreach $arg (@_)
   {
    my $tag = tag_case($arg, undef);
 
-   my @val = ();
    my $len = length $tag;
    my $ref;
 
    foreach $ref (@{$me->{Hdrs}})
     {
-     push(@val, undef $ref) if(substr($ref,0,$len) eq $tag);
+     next unless defined $ref;
+     if(substr($ref,0,$len) eq $tag)
+      {
+       my $tmp;
+       push(@val, $tmp = $ref);
+       $ref = undef;
+      }
     }
   }
+
+ $me->tidy_headers;
 
  return @val;
 }
 
 
-=item * print_header( $fd )
+=item print_header( $fd )
 
-=item * print_body( $fd )
+=item print_body( $fd )
 
-=item * print( $fd )
+=item print( $fd )
 
 Print the header, body or whole message to file descriptor I<$fd>. I<$fd>
 should be a reference to a GLOB
 
- $rfc822->print( \*STDOUT );  # Print message to STDOUT
+ $mail->print( \*STDOUT );  # Print message to STDOUT
 
 =cut
 
@@ -486,7 +492,7 @@ type of method.
 
 =over 2
 
-=item * remove_sig( [$nlines] )
+=item remove_sig( [$nlines] )
 
 Attempts to remove a users signature from the body of a message. It does this 
 by looking for a line equal to C<'--'> within the last C<$nlines>, default = 10,
@@ -508,7 +514,7 @@ sub remove_sig
 
  while($i++ < $nlines && $line--)
   {
-   if($body->[$line] =~ /--[\r\n]*/)
+   if($body->[$line] =~ /\A--[\r\n]+/)
     {
      splice(@{$body},$line,$i);
      last;
@@ -516,7 +522,7 @@ sub remove_sig
   }
 }
 
-=item * tidy_body()
+=item tidy_body()
 
 Removes all leading and trailing lines from the body that only contain
 white spaces.
@@ -542,7 +548,7 @@ sub tidy_body
  return $body;
 }
 
-=item * fold_length( [$length] )
+=item fold_length( [$length] )
 
 Sets or gets the length at which the header fields are folded to.
 
@@ -565,61 +571,182 @@ sub fold_length
  return $old;
 }
 
-=item * reply()
+=item dup()
+
+Create a duplicate of the given Mail::Internet object
+
+=cut
+
+sub dup 
+{
+ my $me = shift;
+
+ my $copy = bless {}, ref $me;
+
+ $copy->{FoldLen} = $me->{FoldLen};
+ $copy->{Body}    = [ @{$me->{Body}} ];
+ $copy->{Hdrs}    = [ @{$me->{Hdrs}} ];
+
+ $copy;
+}
+
+=item clean_header()
+
+Remove all items which do not have any text element
+
+=cut
+
+sub clean_header 
+{
+ my $me = shift;
+
+ local $_;
+
+ foreach (@{$me->{Hdrs}}) 
+  {
+   $_ = undef if(/\A($FIELD_NAME|From )\s*\Z/i);
+  }
+
+ $me->tidy_headers;
+
+ 1;
+}
+
+# Auto loaded methods go after __END__
+__END__
+
+sub reply;
+
+=item reply()
 
 Create a new object with header initialised for a reply to the current 
 object.
 
 =cut
 
-sub reply
+use Mail::Address;
+
+ sub reply
 {
  my $me = shift;
- my $indent = shift || '>';
+ my %arg = @_;
  my $pkg = ref $me;
- my $reply;
+ my $indent = $arg{Indent} || ">";
+ my @reply = ();
 
- if(open(MAILHDR,"$ENV{HOME}/.mailhdr"))
+ if(open(MAILHDR,"$ENV{HOME}/.mailhdr")) 
   {
-   $reply = $pkg->new([<MAILHDR>]);
+   # User has defined a mail header template
+   @reply = <MAILHDR>;
    close(MAILHDR);
   }
- else
-  {
-   $reply = $pkg->new();
-  }
+
+ my $reply = $pkg->new(\@reply);
+
+ my($to,$cc,$name,$body,$id);
+
+ # The Subject line
 
  my $subject = $me->get('Subject') || "";
- my($to,$cc,$name,$body,$id);
 
  $subject = "Re: " . $subject if($subject =~ /\S+/ && $subject !~ /Re:/i);
 
+ $reply->replace('Subject',$subject);
+
+ # Locate who we are sending to
  $to = $me->get('Reply-To')
        || $me->get('From')
        || $me->get('Return-Path')
        || "";
 
- # name_addr returns a list of refs to a 2 element array
- my $to_addr = (Mail::Address->parse($to))[0];
- $name = $to_addr->name;
- $id = $to_addr->address;
+ # Mail::Address->parse returns a list of refs to a 2 element array
+ my $sender = (Mail::Address->parse($to))[0];
 
- if($indent =~ /\Aname/)
+ $name = $sender->name;
+ $id = $sender->address;
+
+ unless(defined $name)
   {
-   my $x = (grep(do {length > 1}, split(/\s+/,$name)))[0] || '';
+   my $fr = $me->get('From');
 
-   $indent =~ s/\Aname/$x/;
+   $fr = (Mail::Address->parse($fr))[0] if(defined $fr);
+   $name = $fr->name if(defined $fr);
   }
 
- my %cc = ();
+ if($indent =~ /%/) 
+  {
+   my %hash = ( '%' => '%');
+   my @name = grep(do { length > 0 }, split(/[\n\s]+/,$name || ""));
+   my @tmp;
+
+   @name = "" unless(@name);
+
+   $hash{f} = $name[0];
+   $hash{F} = $#name ? substr($hash{f},0,1) : $hash{f};
+
+   $hash{l} = $#name ? $name[$#name] : "";
+   $hash{L} = substr($hash{l},0,1) || "";
+
+   $hash{n} = $name || "";
+   $hash{I} = join("",grep($_ = substr($_,0,1), @tmp = @name));
+
+   $indent =~ s/%(.)/defined $hash{$1} ? $hash{$1} : $1/eg;
+  }
+
+ $reply->replace('To', $id);
+
+ # Find addresses not to include
+ my %nocc = ();
+ my $mailaddresses = $ENV{MAILADDRESSES} || "";
  my $addr;
 
- foreach $addr (Mail::Address->parse($me->get('To'),$me->get('Cc'))) {
-  my $lc = lc $addr->address;
-  $cc{$lc} = $addr->format;
- }
+ $nocc{lc $id} = 1;
+
+ foreach $addr (Mail::Address->parse($reply->get('Bcc'),$mailaddresses)) 
+  {
+   my $lc = lc $addr->address;
+   $nocc{$lc} = 1;
+  }
+
+ # Who shall we copy this to
+ my %cc = ();
+
+ foreach $addr (Mail::Address->parse($me->get('To'),$me->get('Cc'))) 
+  {
+   my $lc = lc $addr->address;
+   $cc{$lc} = $addr->format unless(defined $nocc{$lc});
+  }
+
  $cc = join(', ',values %cc);
 
+ $reply->replace('Cc', $cc);
+
+ # References
+ my $refs = $me->get('References') || "";
+ my $mid = $me->get('Message-Id');
+
+ $refs .= " " . $mid if(defined $mid);
+ $reply->replace('References',$refs);
+
+ # In-Reply-To
+ my $date = $me->get('Date');
+ my $inreply = "";
+
+ if(defined $mid)
+  {
+   $inreply  = $mid;
+   $inreply .= " from " . $name if(defined $name);
+   $inreply .= " on " . $date if(defined $date);
+  }
+ elsif(defined $name)
+  {
+   $inreply = $name . "'s message";
+   $inreply .= "of " . $date if(defined $date);
+  }
+
+ $reply->replace('In-Reply-To', $inreply);
+
+ # Quote the body
  $body  = $reply->body;
 
  @$body = @{$me->body};		# copy body
@@ -627,16 +754,186 @@ sub reply
  $reply->tidy_body;		# tidy up
  grep(s/\A/$indent/,@$body);	# indent
 
- $reply->replace('To', $id);
- $reply->replace('Cc', $cc);
- $reply->replace('Subject',$subject);
-
  # Add references
- unshift @{$body},"$name <$id> writes:\n";
- unshift @{$body},"On $date" if(defined ($date = $me->get('Date')));
- unshift @{$body},"In $mid"  if(defined ($mid  = $me->get('Message-Id')));
+ unshift @{$body}, (defined $name ? $name . " " : "") . "<$id> writes:\n";
+
+ if(defined $arg{Keep} && 'ARRAY' eq ref($arg{Keep})) 
+  {
+   # Copy lines from the original
+   my $keep;
+
+   foreach $keep (@{$arg{Keep}}) 
+    {
+     my $ln = $me->get($keep);
+     $reply->replace($keep,$ln) if(defined $ln);
+    }
+  }
+
+ if(defined $arg{Exclude} && 'ARRAY' eq ref($arg{Exclude}))
+  {
+   # Exclude lines
+   $reply->delete(@{$arg{Exclude}});
+  }
+
+ # remove empty header lins
+ $reply->clean_header;
 
  $reply;
+}
+
+=item add_signature ( [$file] )
+
+Append the contents of C<$file>, or "$ENV{HOME}/.signature" if not given,
+to the end of the body text.
+
+=cut
+
+sub add_signature
+{
+ my $me = shift;
+ my $sig = shift || "$ENV{HOME}/.signature";
+ local *SIG;
+
+ if(open(SIG,$sig))
+  {
+   while(<SIG>) { last unless /\A(--)?\s*\Z/; }
+
+   my @sig = ("--\n",$_,<SIG>,"\n");
+   map(s/\n?\Z/\n/,@sig);
+   push(@{$me->body}, @sig);
+
+   close(SIG);
+  }
+}
+
+sub smtpsend;
+
+use Carp;
+use Mail::Util qw(mailaddress);
+use Mail::Address;
+use Net::Domain qw(hostname);
+use Net::SMTP;
+
+=item smtpsend
+
+Send a Mail::Internet message via SMTP
+
+The message will be sent to all addresses on the To, Cc and Bcc
+lines. The SMTP host is found by attempting connections first
+to hosts specified in C<$ENV{SMTPHOSTS}>, a colon separated list,
+then C<mailhost> and C<localhost>.
+
+=cut
+
+ sub smtpsend 
+{
+ my $src  = shift;
+ my($mail,$smtp,@hosts);
+
+ require Net::SMTP;
+
+ @hosts = qw(mailhost localhost);
+ unshift(@hosts, split(/:/, $ENV{SMTPHOSTS})) if(defined $ENV{SMTPHOSTS});
+
+ foreach $host (@hosts) {
+  $smtp = eval { Net::SMTP->new($host) };
+  last if(defined $smtp);
+ }
+
+ croak "Cannot initiate a SMTP connection" unless(defined $smtp);
+
+ $smtp->hello( hostname() );
+ $mail = $src->dup;
+
+ $mail->delete('From '); # Just in case :-)
+
+ $mail->replace('X-Mailer', "Perl5 Mail::Internet v" . Mail::Internet->Version);
+
+ # Ensure the mail has the following headers
+ # Sender, From, Reply-To
+
+ my($from,$name,$tag);
+
+ $name = (getpwuid($>))[6] || $ENV{NAME} || "";
+ while($name =~ s/\([^\(]*\)//) { 1; }
+
+ $from = sprintf "%s <%s>", $name, mailaddress();
+ $from =~ s/\s{2,}/ /g;
+
+ foreach $tag (qw(Sender From Reply-To))
+  {
+   $mail->add($tag,$from) unless($mail->get($tag));
+  }
+
+ # An original message should not have any Recieved lines
+
+ $mail->delete('Recieved');
+
+ # Who is it to
+
+ my @rcpt = ($mail->get('To', 'Cc', 'Bcc'));
+ my @addr = map($_->address, Mail::Address->parse(@rcpt));
+
+ return () unless(@addr);
+
+ $mail->delete('Bcc'); # Remove blind Cc's
+ $mail->clean_header;
+
+ # Send it
+
+ my $ok = $smtp->mail( mailaddress() ) &&
+            $smtp->to(@addr) &&
+            $smtp->data(join("", @{$mail->header},"\n",@{$mail->body}));
+
+ $smtp->quit;
+
+ $ok ? @addr : ();
+}
+
+sub nntppost;
+
+use Mail::Util qw(mailaddress);
+
+=item nntppost()
+
+Post an article via NNTP, require News::NNTPClient.
+
+=cut
+
+require News::NNTPClient;
+
+ sub nntppost
+{
+ my $mail = shift;
+
+ my $groups = $mail->get('Newsgroups') || "";
+ my @groups = split(/[\s,]+/,$groups);
+
+ return () unless @groups;
+
+ my $art = $mail->dup;
+
+ $art->clean_header;
+ $art->replace('X-Mailer', "Perl5 Mail::Internet v" . Mail::Internet->Version);
+
+ unless($art->get('From'))
+  {
+   my $name = $ENV{NAME} || (getpwuid($>))[6];
+   while( $name =~ s/\([^\(]*\)// ) {1};
+   $art->replace('From',$name . " <" . mailaddress() . ">");
+  }
+
+ # Remove these incase the NNTP host decides to mail as well as me
+ $art->delete(qw(To Cc Bcc)); 
+ $art->clean_header;
+
+ my $news = new News::NNTPClient;
+ $news->post(@{$art->header},"\n",@{$art->body});
+
+ my $code = $news->code;
+ $news->quit;
+
+ return 240 == $code ? @groups : ();
 }
 
 =back
@@ -653,7 +950,7 @@ as Perl itself.
 
 =head1 REVISION
 
-$Revision: 1.8 $
+$Revision: 1.17 $
 
 =cut
 

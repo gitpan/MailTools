@@ -18,7 +18,7 @@ Text Messages>.
 =cut
 
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.6 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION }
 
 #
@@ -33,7 +33,7 @@ sub _extract_name
  s/\(.*\)//go;		# remove inbeded comments
 
  s/(([a-z]+|[a-z]\-[a-z])+)\s*,?\s*(([a-z]\s*\.\s*)+)(\[^\sa-z]|\Z)/$3 $1/io;	# change Barr, G. M. => G. M. Barr
- s/\A[^a-z]*(([a-z \.]|[a-z]\-[a-z])+).*/$1/igo;			# remove leading/trailing punctuation
+ s/\A[^a-z]*(([a-z \-\.]|[a-z]\-[a-z])+).*/$1/igo;			# remove leading/trailing punctuation
 
  s/[\.\s]+/ /go;		# change . => ' ' and condense spaces
 
@@ -296,7 +296,7 @@ sub name {
  # Roman numerals upto M (I think ?)
  # m*([cxi]m)?d*([cxi]d)?c*([xi]c)?l*([xi]l)?x*(ix)?v*(iv)?i*
  $name =~ s/(\A\s+|\s+\Z)//go;
- return $name;
+ return length($name) ? $name : undef;
 }
 
 =head2 host()
