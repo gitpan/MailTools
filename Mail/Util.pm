@@ -9,7 +9,7 @@ use strict;
 
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = do { my @r=(q$Revision: 1.12 $=~/\d+/g); sprintf "%d."."%02d"x$#r,@r};
+$VERSION = "1.13";
 sub Version { $VERSION }
 
 =head1 NAME
@@ -75,6 +75,7 @@ sub read_mbox;
 
 
 use FileHandle;
+use Carp;
 require POSIX;
 
  sub read_mbox {
@@ -119,7 +120,7 @@ sub maildomain {
  ##
 
  local *CF;
- my @sendmailcf = qw(/etc /etc/sendmail /etc/ucblib /etc/mail /usr/lib);
+ my @sendmailcf = qw(/etc /etc/sendmail /etc/ucblib /etc/mail /usr/lib /var/adm/sendmail);
 
  my $config = (grep(-r, map("$_/sendmail.cf", @sendmailcf)))[0];
 

@@ -1,3 +1,14 @@
+Tue Nov 25 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Mailer
+	- Incremented VERSION, for some unknown reason it went backwards.
+
+Mon Nov 17 1997 <gbarr@pobox.com> (Graham Barr)
+
+	Mail::Util
+	- Added /var/adm/sendmail to the list of directories to search
+	  for sendmail.cf
+
 Mon Nov 17 1997 <gbarr@pobox.com> (Graham Barr)
 
 	Mail::Internet
