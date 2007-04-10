@@ -1,7 +1,33 @@
 
+==== version history for MailTools
+
+version 1.77: Tue Apr 10 09:25:29 CEST 2007
+
+	- The tag (field label) casing is "normalized" which is not
+	  required (as the comment in the code told), but a mis-
+	  feature.  The feature will not change, to avoid breaking
+	  existing code. Original report by [Matt Swift]
+
+	- Do not ignore unknown argument to Mail::Internet::new(),
+	  but complain about it [JPBS]
+
+	- Document that the \n is still after a header line, but folding
+	  is removed. Suggested by [Roberto Jimenoca]
+
+	- Document that unfolding is too greading, taking all leading
+	  blanks where only one should be taken. Suggested by
+	  [Roberto Jimenoca]
+
+version 1.75: Wed Jun 14 15:30:25 CEST 2006
+
+	- [Mike Lerley] reported that environment variables are not
+	  thread-safe in mod_perl.  Therefore, he required to pass the
+	  sender of the message explictly on qmail's command-line.
+	  His addapted patch included.
+
 version 1.74: Tue Feb 28 08:39:14 CET 2006
 
-	- Help from [Jun Kuriyama]
+	- Finally fixed exec with SMTP, with help from [Jun Kuriyama]
 
 version 1.73: Sat Jan 21 09:54:13 CET 2006
 
