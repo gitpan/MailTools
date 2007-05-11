@@ -1,7 +1,20 @@
 
 ==== version history for MailTools
 
-version 1.77: Tue Apr 10 09:25:29 CEST 2007
+version 1.77: Fri May 11 14:16:01 CEST 2007
+
+	- fixed syntax error in qmail.pm, patch by [Alexey Tourbin]
+	  also reported by [Volker Paulsen]
+
+	- die if qmail's exec fails.
+
+	- require Data::Format
+
+	- corrected header field folding according to rfc2822, which
+	  may break some ancient (poor) applications.
+	  Patch by [Christopher Madsen]
+
+version 1.76: Tue Apr 10 09:25:29 CEST 2007
 
 	- The tag (field label) casing is "normalized" which is not
 	  required (as the comment in the code told), but a mis-
@@ -21,7 +34,7 @@ version 1.77: Tue Apr 10 09:25:29 CEST 2007
 version 1.75: Wed Jun 14 15:30:25 CEST 2006
 
 	- [Mike Lerley] reported that environment variables are not
-	  thread-safe in mod_perl.  Therefore, he required to pass the
+	  thread-safe in mod_perl.  Therefore, we must pass the
 	  sender of the message explictly on qmail's command-line.
 	  His addapted patch included.
 

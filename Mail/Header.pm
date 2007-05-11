@@ -20,7 +20,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $FIELD_NAME);
 
-$VERSION = "1.76";
+$VERSION = "1.77";
 
 my $MAIL_FROM = 'KEEP';
 my %HDR_LENGTHS = ();
@@ -106,7 +106,7 @@ sub _fold_line
  my $min = int($maxlen * 4 / 5) - 4;
  my $ml = $maxlen;
 
- $_[0] =~ s/[\r\n]+/ /og;       # Remove new-lines
+ $_[0] =~ s/[\r\n]+//og;        # Remove new-lines
  $_[0] =~ s/\s*\Z/\n/so;        # End line with a EOLN
 
  return if $_[0] =~ /^From\s/io;
@@ -136,7 +136,7 @@ sub _fold_line
     }
    else
     {
-      $_[0] =~ s/(.{$min,$max})\s+/$+\n /g;
+      $_[0] =~ s/(.{$min,$max})(\s)/$1\n$2/g;
       $_[0] =~ s/\s*$/\n/s;
     }
   }
