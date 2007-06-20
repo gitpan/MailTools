@@ -1,10 +1,18 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         MailTools
-version:      1.77
-version_from: 
-installdirs:  site
-requires:
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+--- #YAML:1.0
+name:                MailTools
+version:             2.00_01
+abstract:            Various Mail related modules
+license:             ~
+generated_by:        ExtUtils::MakeMaker version 6.32
+distribution_type:   module
+requires:     
+    IO::Handle:                    0
+    Net::Domain:                   1.05
+    Net::SMTP:                     1.03
+    Test::More:                    0
+    Test::Pod:                     1
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - Mark Overmeer <perl@overmeer.net>
