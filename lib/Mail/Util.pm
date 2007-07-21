@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Util;
 use vars '$VERSION';
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 use base 'Exporter';
 
 our @EXPORT_OK = qw(read_mbox maildomain mailaddress);
@@ -101,7 +101,8 @@ sub maildomain()
 
     if(eval {require Net::SMTP})
     {   foreach my $host (qw(mailhost localhost))
-        {   my $smtp = eval { Net::SMTP->new($host) };
+        {   # hosts are local, so short timeout
+            my $smtp = eval { Net::SMTP->new($host, Timeout => 5) };
 	    if(defined $smtp)
             {   $domain = $smtp->domain;
 		$smtp->quit;

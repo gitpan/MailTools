@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Field::AddrList;
 use vars '$VERSION';
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 use base 'Mail::Field';
 
 use Carp;

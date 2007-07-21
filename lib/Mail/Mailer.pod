@@ -85,6 +85,39 @@ contents of the header field.  The value can either be a scalar
 
 =back
 
+=head1 DETAILS
+
+=head2 ENVIRONMENT VARIABLES
+
+=over 4
+
+=item PERL_MAILERS
+
+Augments/override the build in choice for binary used to send out
+our mail messages.
+
+Format:
+
+    "type1:mailbinary1;mailbinary2;...:type2:mailbinaryX;...:..."
+
+Example: assume you want you use private sendmail binary instead
+of mailx, one could set C<PERL_MAILERS> to:
+
+    "mail:/does/not/exists:sendmail:$HOME/test/bin/sendmail"
+
+On systems which may include C<:> in file names, use C<|> as separator
+between type-groups.
+
+    "mail:c:/does/not/exists|sendmail:$HOME/test/bin/sendmail"
+
+=back
+
+=head2 BUGS
+
+Mail::Mailer does not help with folding, and does not protect
+against various web-script hacker attacks, for instance where
+a new-line is inserted in the content of the field.
+
 =head1 SEE ALSO
 
 This module is part of the MailTools distribution,

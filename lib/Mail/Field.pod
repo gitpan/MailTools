@@ -130,6 +130,45 @@ this method does not add additional processing.
 
 =back
 
+=head1 DETAILS
+
+=head2 SUB-CLASS PACKAGE NAMES
+
+All sub-classes should be called Mail::Field::I<name> where I<name> is
+derived from the tag using these rules.
+
+=over 4
+
+=item *
+
+Consider a tag as being made up of elements separated by '-'
+
+=item *
+
+Convert all characters to lowercase except the first in each element, which
+should be uppercase.
+
+=item *
+
+I<name> is then created from these elements by using the first
+N characters from each element.
+
+=item *
+
+N is calculated by using the formula :-
+
+    int((7 + #elements) / #elements)
+
+=item *
+
+I<name> is then limited to a maximum of 8 characters, keeping the first 8
+characters.
+
+=back
+
+For an example of this take a look at the definition of the 
+C<_header_pkg_name()> subroutine in C<Mail::Field>
+
 =head1 DIAGNOSTICS
 
 Error: Undefined subroutine <method> called

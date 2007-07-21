@@ -155,6 +155,8 @@ See L<Mail::Field/"Smart accessors">
 
 =back
 
+=head1 DETAILS
+
 =head1 DIAGNOSTICS
 
 Error: Undefined subroutine <method> called

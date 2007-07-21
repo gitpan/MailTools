@@ -120,6 +120,8 @@ Query (or change) the TIME (as stored in the field) in seconds.
 
 =back
 
+=head1 DETAILS
+
 =head1 DIAGNOSTICS
 
 Error: Undefined subroutine <method> called

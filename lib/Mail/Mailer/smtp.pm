@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Mailer::smtp;
 use vars '$VERSION';
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 use base 'Mail::Mailer::rfc822';
 
 use Net::SMTP;
@@ -74,16 +74,17 @@ sub close(@)
     # Epilogue should destroy the SMTP filehandle,
     # but just to be on the safe side.
     $sock && fileno $sock
-        return 1;
+        or return 1;
 
     close $sock
         or croak 'Cannot destroy socket filehandle';
+
     1;
 }
 
 package Mail::Mailer::smtp::pipe;
 use vars '$VERSION';
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 
 sub TIEHANDLE
 {   my ($class, $self) = @_;

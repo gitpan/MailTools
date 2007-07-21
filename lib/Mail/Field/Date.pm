@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Field::Date;
 use vars '$VERSION';
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 use base 'Mail::Field';
 
 use Date::Format qw(time2str);

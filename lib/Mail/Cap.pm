@@ -4,7 +4,7 @@
 # Pod stripped from pm file by OODoc 1.02.
 package Mail::Cap;
 use vars '$VERSION';
-$VERSION = '2.00_01';
+$VERSION = '2.00_02';
 use strict;
 
 sub Version { our $VERSION }
