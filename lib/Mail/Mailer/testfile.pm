@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Mailer::testfile;
 use vars '$VERSION';
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 use base 'Mail::Mailer::rfc822';
 
 use Mail::Util qw/mailaddress/;
@@ -35,7 +35,7 @@ sub close { 1 }
 
 package Mail::Mailer::testfile::pipe;
 use vars '$VERSION';
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 
 sub TIEHANDLE
 {   my ($class, $self) = @_;

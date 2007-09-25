@@ -2,6 +2,8 @@
 
 Mail::Internet - manipulate email messages
 
+=head1 INHERITANCE
+
 =head1 SYNOPSIS
 
   use Mail::Internet;

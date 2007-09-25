@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Util;
 use vars '$VERSION';
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 use base 'Exporter';
 
 our @EXPORT_OK = qw(read_mbox maildomain mailaddress);

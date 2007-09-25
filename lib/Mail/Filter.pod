@@ -2,6 +2,8 @@
 
 Mail::Filter - Filter mail through multiple subroutines
 
+=head1 INHERITANCE
+
 =head1 SYNOPSIS
 
  use Mail::Filter;

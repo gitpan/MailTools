@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Mailer;
 use vars '$VERSION';
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 use base 'IO::Handle';
 
 use POSIX qw/_exit/;
@@ -164,8 +164,8 @@ sub _cleanup_hdrs($)
     }
 }
 
-sub exec($$$)
-{   my($self, $exe, $args, $to) = @_;
+sub exec($$$$)
+{   my($self, $exe, $args, $to, $sender) = @_;
 
     # Fork and exec the mailer (no shell involved to avoid risks)
     my @exe = split /\s+/, $exe;

@@ -1,8 +1,10 @@
-<SOFTPKG NAME="MailTools" VERSION="2,00_02,0,0">
+<SOFTPKG NAME="MailTools" VERSION="2,00_03,0,0">
     <TITLE>MailTools</TITLE>
     <ABSTRACT>Various Mail related modules</ABSTRACT>
     <AUTHOR>Mark Overmeer &lt;perl@overmeer.net&gt;</AUTHOR>
     <IMPLEMENTATION>
+        <DEPENDENCY NAME="Date-Format" VERSION="0,0,0,0" />
+        <DEPENDENCY NAME="Date-Parse" VERSION="0,0,0,0" />
         <DEPENDENCY NAME="IO-Handle" VERSION="0,0,0,0" />
         <DEPENDENCY NAME="Net-Domain" VERSION="1,05,0,0" />
         <DEPENDENCY NAME="Net-SMTP" VERSION="1,03,0,0" />

@@ -5,7 +5,7 @@ Mail::Util - mail utility functions
 =head1 INHERITANCE
 
  Mail::Util
-   is an Exporter
+   is a Exporter
 
 =head1 SYNOPSIS
 

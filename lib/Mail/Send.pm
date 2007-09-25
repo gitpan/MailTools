@@ -6,7 +6,7 @@
 use strict;
 package Mail::Send;
 use vars '$VERSION';
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 
 use Carp;
 require Mail::Mailer;

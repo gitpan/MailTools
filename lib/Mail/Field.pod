@@ -2,6 +2,13 @@
 
 Mail::Field - Base class for manipulation of mail header fields
 
+=head1 INHERITANCE
+
+ Mail::Field is extended by
+   Mail::Field::AddrList
+   Mail::Field::Date
+   Mail::Field::Generic
+
 =head1 SYNOPSIS
 
  use Mail::Field;

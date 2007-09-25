@@ -2,6 +2,8 @@
 
 Mail::Send - Simple electronic mail interface
 
+=head1 INHERITANCE
+
 =head1 SYNOPSIS
 
   require Mail::Send;

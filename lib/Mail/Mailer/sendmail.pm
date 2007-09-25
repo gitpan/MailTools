@@ -6,11 +6,11 @@ use strict;
 
 package Mail::Mailer::sendmail;
 use vars '$VERSION';
-$VERSION = '2.00_02';
+$VERSION = '2.00_03';
 use base 'Mail::Mailer::rfc822';
 
-sub exec($$$)
-{   my($self, $exe, $args, $to) = @_;
+sub exec($$$$)
+{   my($self, $exe, $args, $to, $sender) = @_;
     # Fork and exec the mailer (no shell involved to avoid risks)
 
     # We should always use a -t on sendmail so that Cc: and Bcc: work

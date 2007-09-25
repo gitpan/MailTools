@@ -2,6 +2,8 @@
 
 Mail::Cap - Parse mailcap files
 
+=head1 INHERITANCE
+
 =head1 SYNOPSIS
 
  my $mc = new Mail::Cap;
