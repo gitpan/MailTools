@@ -1,10 +1,10 @@
 # Copyrights 1995-2007 by Mark Overmeer <perl@overmeer.net>.
 #  For other contributors see ChangeLog.
 # See the manual pages for details on the licensing terms.
-# Pod stripped from pm file by OODoc 1.02.
+# Pod stripped from pm file by OODoc 1.03.
 package Mail::Address;
 use vars '$VERSION';
-$VERSION = '2.00_03';
+$VERSION = '2.01';
 use strict;
 
 use Carp;
@@ -25,12 +25,6 @@ sub _extract_name
 
     # Using encodings, too hard. See Mail::Message::Field::Full.
     return '' if m/\=\?.*?\?\=/;
-
-    # Bug in unicode \U, perl 5.8.0 breaks when casing utf8 in regex
-    if($] eq 5.008)
-    {   require utf8;
-        eval 'utf8::downgrade($_)';
-    }
 
     # trim whitespace
     s/^\s+//;

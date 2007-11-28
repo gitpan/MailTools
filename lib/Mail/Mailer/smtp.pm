@@ -1,12 +1,12 @@
 # Copyrights 1995-2007 by Mark Overmeer <perl@overmeer.net>.
 #  For other contributors see ChangeLog.
 # See the manual pages for details on the licensing terms.
-# Pod stripped from pm file by OODoc 1.02.
+# Pod stripped from pm file by OODoc 1.03.
 use strict;
 
 package Mail::Mailer::smtp;
 use vars '$VERSION';
-$VERSION = '2.00_03';
+$VERSION = '2.01';
 use base 'Mail::Mailer::rfc822';
 
 use Net::SMTP;
@@ -84,7 +84,7 @@ sub close(@)
 
 package Mail::Mailer::smtp::pipe;
 use vars '$VERSION';
-$VERSION = '2.00_03';
+$VERSION = '2.01';
 
 sub TIEHANDLE
 {   my ($class, $self) = @_;

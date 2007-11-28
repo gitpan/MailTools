@@ -1,10 +1,10 @@
 # Copyrights 1995-2007 by Mark Overmeer <perl@overmeer.net>.
 #  For other contributors see ChangeLog.
 # See the manual pages for details on the licensing terms.
-# Pod stripped from pm file by OODoc 1.02.
+# Pod stripped from pm file by OODoc 1.03.
 package Mail::Cap;
 use vars '$VERSION';
-$VERSION = '2.00_03';
+$VERSION = '2.01';
 use strict;
 
 sub Version { our $VERSION }
@@ -33,7 +33,6 @@ sub new
     my $take_all = $args{take} && uc $args{take} eq 'ALL';
 
     my $self  = bless {_count => 0}, $class;
-
 
     $self->_process_file($args{filename})
         if defined $args{filename} && -r $args{filename};
