@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                MailTools
-version:             2.01
+version:             2.02
 abstract:            Various Mail related modules
 license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.36_01

@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Mailer;
 use vars '$VERSION';
-$VERSION = '2.01';
+$VERSION = '2.02';
 use base 'IO::Handle';
 
 use POSIX qw/_exit/;

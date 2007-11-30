@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Mailer::smtp;
 use vars '$VERSION';
-$VERSION = '2.01';
+$VERSION = '2.02';
 use base 'Mail::Mailer::rfc822';
 
 use Net::SMTP;
@@ -84,7 +84,7 @@ sub close(@)
 
 package Mail::Mailer::smtp::pipe;
 use vars '$VERSION';
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 sub TIEHANDLE
 {   my ($class, $self) = @_;
