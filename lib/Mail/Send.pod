@@ -29,7 +29,8 @@ Mail::Send - Simple electronic mail interface
   $fh = $msg->open;   # some default mailer
   $fh = $msg->open('sendmail'); # explicit
   print $fh "Body of message";
-  $fh->close;         # complete the message and send it
+  $fh->close          # complete the message and send it
+      or die "couldn't send whole message: $!\n";
 
 =head1 DESCRIPTION
 
@@ -121,7 +122,7 @@ F<http://perl.overmeer.net/mailtools/>.
 =head1 AUTHORS
 
 The MailTools bundle was developed by Graham Barr.  Later, Mark
-Overmeer took over maintenance without development.
+Overmeer took over maintenance without commitment to further development.
 
 Mail::Cap by Gisle Aas E<lt>aas@oslonett.noE<gt>.
 Mail::Field::AddrList by Peter Orbaek E<lt>poe@cit.dkE<gt>.
