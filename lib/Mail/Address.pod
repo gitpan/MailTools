@@ -2,8 +2,6 @@
 
 Mail::Address - Parse mail addresses
 
-=head1 INHERITANCE
-
 =head1 SYNOPSIS
 
  use Mail::Address;

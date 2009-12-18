@@ -2,8 +2,6 @@
 
 Mail::Header - manipulate MIME headers
 
-=head1 INHERITANCE
-
 =head1 SYNOPSIS
 
  use Mail::Header;
