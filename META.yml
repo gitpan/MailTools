@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:                MailTools
-version:             2.05
-abstract:            Various Mail related modules
+version:             2.06
+abstract:            Various e-mail related modules
 license:             perl
 author:              
     - Mark Overmeer <perl@overmeer.net>
