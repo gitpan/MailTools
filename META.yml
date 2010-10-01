@@ -1,20 +1,28 @@
 --- #YAML:1.0
-name:                MailTools
-version:             2.06
-abstract:            Various e-mail related modules
-license:             perl
-author:              
+name:               MailTools
+version:            2.07
+abstract:           Various e-mail related modules
+author:
     - Mark Overmeer <perl@overmeer.net>
-generated_by:        ExtUtils::MakeMaker version 6.42
-distribution_type:   module
-requires:     
-    Date::Format:                  0
-    Date::Parse:                   0
-    IO::Handle:                    0
-    Net::Domain:                   1.05
-    Net::SMTP:                     1.03
-    Test::More:                    0
-    Test::Pod:                     1
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Date::Format:  0
+    Date::Parse:   0
+    IO::Handle:    0
+    Net::Domain:   1.05
+    Net::SMTP:     1.03
+    Test::More:    0
+    Test::Pod:     1
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.56
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
