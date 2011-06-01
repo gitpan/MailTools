@@ -49,7 +49,8 @@ distribution yourself: it is not automatically installed.
 =item C<smtps>
 
 Use the smtp over ssl protocol via L<Net::SMTP::SSL> to deliver the mail.
-Usage is identical to C<smtp>.
+Usage is identical to C<smtp>. You have to install Authen::SASL as
+well.
 
  $mailer = Mail::Mailer->new('smtps', Server => $server);
 
@@ -72,19 +73,15 @@ default mailer will be the first one found.
 
 =head2 Constructors
 
-Mail::Mailer-E<gt>B<new>(TYPE, ARGS)
-
 =over 4
+
+=item Mail::Mailer-E<gt>B<new>(TYPE, ARGS)
 
 The TYPE is one of the back-end sender implementations, as described in
 the DESCRIPTION chapter of this manual page.  The ARGS are passed to
 that back-end.
 
-=back
-
-$obj-E<gt>B<open>(HASH)
-
-=over 4
+=item $obj-E<gt>B<open>(HASH)
 
 The HASH consists of key and value pairs, the key being the name of
 the header field (eg, C<To>), and the value being the corresponding
