@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               MailTools
-version:            2.08
+version:            2.09
 abstract:           Various e-mail related modules
 author:
     - Mark Overmeer <perl@overmeer.net>
@@ -17,7 +17,6 @@ requires:
     Net::Domain:   1.05
     Net::SMTP:     1.03
     Test::More:    0
-    Test::Pod:     1
 no_index:
     directory:
         - t

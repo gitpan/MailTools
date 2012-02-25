@@ -80,11 +80,11 @@ example:
 
 =over 4
 
-=item $obj-E<gt>B<address>
+=item $obj-E<gt>B<address>()
 
 Return the address part of the object.
 
-=item $obj-E<gt>B<comment>
+=item $obj-E<gt>B<comment>()
 
 Return the comment part of the object
 
@@ -95,7 +95,7 @@ on a C<To>, C<Cc>, or C<Bcc> line of a message.  This method is called on
 the first ADDRESS to be used; other specified ADDRESSes will be appended,
 separated with commas.
 
-=item $obj-E<gt>B<phrase>
+=item $obj-E<gt>B<phrase>()
 
 Return the phrase part of the object.
 
@@ -105,16 +105,16 @@ Return the phrase part of the object.
 
 =over 4
 
-=item $obj-E<gt>B<host>
+=item $obj-E<gt>B<host>()
 
 Return the address excluding the user id and '@'
 
-=item $obj-E<gt>B<name>
+=item $obj-E<gt>B<name>()
 
 Using the information contained within the object attempt to identify what
 the person or groups name is.
 
-=item $obj-E<gt>B<user>
+=item $obj-E<gt>B<user>()
 
 Return the address excluding the '@' and the mail domain
 

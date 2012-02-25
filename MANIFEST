@@ -38,7 +38,6 @@ lib/Mail/Send.pm
 lib/Mail/Send.pod
 lib/Mail/Util.pm
 lib/Mail/Util.pod
-t/99pod.t
 t/extract.t
 t/header.t
 t/internet.t
@@ -46,4 +45,5 @@ t/mailcap.t
 t/mailer.t
 t/require.t
 t/send.t
+xt/99pod.t
 META.yml                                 Module meta-data (added by MakeMaker)

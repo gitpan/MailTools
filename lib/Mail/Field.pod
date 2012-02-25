@@ -75,7 +75,7 @@ This constructor is used internally with preprocessed field information.
 When called on an existing object, its original content will get
 replaced.
 
-=item $obj-E<gt>B<parse>
+=item $obj-E<gt>B<parse>()
 
 Parse a field line.
 
@@ -89,13 +89,13 @@ Parse a field line.
 
 Change the settings (the content, but then smart) of this field.
 
-=item $obj-E<gt>B<stringify>
+=item $obj-E<gt>B<stringify>()
 
 Returns the field as a string.
 
-=item $obj-E<gt>B<tag>
+=item $obj-E<gt>B<tag>()
 
-=item Mail::Field-E<gt>B<tag>
+=item Mail::Field-E<gt>B<tag>()
 
 Return the tag (in the correct case) for this item.  Well, actually any
 casing is OK, because the field tags are treated case-insentitive; however

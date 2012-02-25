@@ -44,7 +44,7 @@ See L<Mail::Field/"Constructors">
 
 See L<Mail::Field/""Fake" constructors">
 
-=item $obj-E<gt>B<parse>
+=item $obj-E<gt>B<parse>()
 
 See L<Mail::Field/""Fake" constructors">
 
@@ -70,13 +70,13 @@ A string acceptable to Date::Parse.
 
 =back
 
-=item $obj-E<gt>B<stringify>
+=item $obj-E<gt>B<stringify>()
 
 See L<Mail::Field/"Accessors">
 
-=item $obj-E<gt>B<tag>
+=item $obj-E<gt>B<tag>()
 
-=item Mail::Field::Date-E<gt>B<tag>
+=item Mail::Field::Date-E<gt>B<tag>()
 
 See L<Mail::Field/"Accessors">
 

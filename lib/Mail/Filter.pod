@@ -64,13 +64,13 @@ If the first argument is a C<Mail::Internet> object, then this object will
 be passed through the filter list. If the first argument is a C<Mail::Folder>
 object, then each message in turn will be passed through the filter list.
 
-=item $obj-E<gt>B<folder>
+=item $obj-E<gt>B<folder>()
 
 While the C<filter> method is called with a C<Mail::Folder> object, these
 filter subroutines can call this method to obtain the folder object that is
 being processed.
 
-=item $obj-E<gt>B<msgnum>
+=item $obj-E<gt>B<msgnum>()
 
 If the C<filter> method is called with a C<Mail::Folder> object, then the
 filter subroutines may call this method to obtain the message number

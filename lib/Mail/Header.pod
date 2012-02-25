@@ -33,7 +33,7 @@ and therefore better.
 
 =over 4
 
-=item $obj-E<gt>B<dup>
+=item $obj-E<gt>B<dup>()
 
 Create a duplicate of the current object.
 
@@ -81,7 +81,7 @@ header object, of which the original content will be destroyed.
 
 =over 4
 
-=item $obj-E<gt>B<empty>
+=item $obj-E<gt>B<empty>()
 
 Empty an existing C<Mail::Header> object of all lines.
 
@@ -158,11 +158,11 @@ extracted from the beginning of the given line. If INDEX is given,
 the new line will be inserted into the header at the given point, otherwise
 the new line will be appended to the end of the header.
 
-=item $obj-E<gt>B<as_string>
+=item $obj-E<gt>B<as_string>()
 
 Returns the header as a single string.
 
-=item $obj-E<gt>B<cleanup>
+=item $obj-E<gt>B<cleanup>()
 
 Remove any header line that, other than the tag, only contains whitespace
 
@@ -211,7 +211,7 @@ the new line will replace the Nth instance of that tag, otherwise the
 first instance of the tag is replaced. If the tag does not appear in the
 header then a new line will be appended to the header.
 
-=item $obj-E<gt>B<tags>
+=item $obj-E<gt>B<tags>()
 
 Returns an array of all the tags that exist in the header. Each tag will
 only appear in the list once. The order of the tags is not specified.

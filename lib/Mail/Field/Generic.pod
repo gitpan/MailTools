@@ -69,13 +69,13 @@ Set the new text, which is empty when no STRING is provided.
 
 See L<Mail::Field/"Accessors">
 
-=item $obj-E<gt>B<stringify>
+=item $obj-E<gt>B<stringify>()
 
 See L<Mail::Field/"Accessors">
 
-=item $obj-E<gt>B<tag>
+=item $obj-E<gt>B<tag>()
 
-=item Mail::Field::Generic-E<gt>B<tag>
+=item Mail::Field::Generic-E<gt>B<tag>()
 
 See L<Mail::Field/"Accessors">
 

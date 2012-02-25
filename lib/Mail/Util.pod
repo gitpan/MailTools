@@ -21,7 +21,7 @@ the calling package.
 
 =over 4
 
-=item B<mailaddress>
+=item B<mailaddress>()
 
 Return a guess at the current users mail address. The user can force
 the return value by setting the MAILADDRESS environment variable.
@@ -43,7 +43,7 @@ example:
  use Mail::Util 'mailaddress';
  print mailaddress;
 
-=item B<maildomain>
+=item B<maildomain>()
 
 Attempt to determine the current uers mail domain string via the following
 methods

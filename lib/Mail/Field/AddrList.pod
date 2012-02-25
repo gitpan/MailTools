@@ -66,7 +66,7 @@ See L<Mail::Field/"Constructors">
 
 See L<Mail::Field/""Fake" constructors">
 
-=item $obj-E<gt>B<parse>
+=item $obj-E<gt>B<parse>()
 
 See L<Mail::Field/""Fake" constructors">
 
@@ -80,13 +80,13 @@ See L<Mail::Field/""Fake" constructors">
 
 See L<Mail::Field/"Accessors">
 
-=item $obj-E<gt>B<stringify>
+=item $obj-E<gt>B<stringify>()
 
 See L<Mail::Field/"Accessors">
 
-=item $obj-E<gt>B<tag>
+=item $obj-E<gt>B<tag>()
 
-=item Mail::Field::AddrList-E<gt>B<tag>
+=item Mail::Field::AddrList-E<gt>B<tag>()
 
 See L<Mail::Field/"Accessors">
 
@@ -96,15 +96,15 @@ See L<Mail::Field/"Accessors">
 
 =over 4
 
-=item $obj-E<gt>B<addr_list>
+=item $obj-E<gt>B<addr_list>()
 
 Returns the collected L<Mail::Address|Mail::Address> objects.
 
-=item $obj-E<gt>B<addresses>
+=item $obj-E<gt>B<addresses>()
 
 Returns a list if email addresses, found in the field content.
 
-=item $obj-E<gt>B<names>
+=item $obj-E<gt>B<names>()
 
 Returns a list of nicely formatted named, for each of the addresses
 found in the content.

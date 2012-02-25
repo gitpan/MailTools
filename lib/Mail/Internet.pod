@@ -25,7 +25,7 @@ support in your application.
 
 =over 4
 
-=item $obj-E<gt>B<dup>
+=item $obj-E<gt>B<dup>()
 
 Duplicate the message as a whole.  Both header and body will be
 deep-copied: a new L<Mail::Internet|Mail::Internet> object is returned.
@@ -89,7 +89,7 @@ the body will be replaced. If a reference is passed, it is used directly
 and not copied, so any subsequent changes to the array will change the
 contents of the body.
 
-=item $obj-E<gt>B<head>
+=item $obj-E<gt>B<head>()
 
 Returns the C<Mail::Header> object which holds the headers for the current
 message
@@ -106,7 +106,7 @@ Returns the message as a string in mbox format.  C<ALREADY_ESCAPED>, if
 given and true, indicates that L<escape_from()|Mail::Internet/"High-level functionality"> has already been called on
 this object.
 
-=item $obj-E<gt>B<as_string>
+=item $obj-E<gt>B<as_string>()
 
 Returns the message as a single string.
 
@@ -210,7 +210,7 @@ Take from the FILEHANDLE all lines starting from the first C<< -- >>.
 
 =back
 
-=item $obj-E<gt>B<tidy_body>
+=item $obj-E<gt>B<tidy_body>()
 
 Removes all leading and trailing lines from the body that only contain
 white spaces.
@@ -221,7 +221,7 @@ white spaces.
 
 =over 4
 
-=item $obj-E<gt>B<escape_from>
+=item $obj-E<gt>B<escape_from>()
 
 It can cause problems with some applications if a message contains a line
 starting with C<`From '>, in particular when attempting to split a folder.
