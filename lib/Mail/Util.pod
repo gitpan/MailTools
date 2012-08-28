@@ -21,10 +21,11 @@ the calling package.
 
 =over 4
 
-=item B<mailaddress>()
+=item B<mailaddress>([ADDRESS])
 
 Return a guess at the current users mail address. The user can force
 the return value by setting the MAILADDRESS environment variable.
+[2.10] You may set the ADDRESS via the parameter.
 
 WARNING:
 When not supplied via the environment variable, <mailaddress> looks at
@@ -42,6 +43,9 @@ example:
  # everywhere else
  use Mail::Util 'mailaddress';
  print mailaddress;
+
+ # since v2.10
+ mailaddress "me@example.com";
 
 =item B<maildomain>()
 
