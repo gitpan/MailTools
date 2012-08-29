@@ -6,7 +6,7 @@ use strict;
 
 package Mail::Mailer::smtp;
 use vars '$VERSION';
-$VERSION = '2.10';
+$VERSION = '2.11';
 
 use base 'Mail::Mailer::rfc822';
 
@@ -32,7 +32,7 @@ sub exec {
 
     ${*$self}{sock} = $smtp;
 
-    $smtp->mail($opt{From} || mailaddres);
+    $smtp->mail($opt{From} || mailaddress());
     $smtp->to($_) for @$to;
     $smtp->data;
 
@@ -85,7 +85,7 @@ sub close(@)
 
 package Mail::Mailer::smtp::pipe;
 use vars '$VERSION';
-$VERSION = '2.10';
+$VERSION = '2.11';
 
 
 sub TIEHANDLE

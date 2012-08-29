@@ -4,7 +4,7 @@
 # Pod stripped from pm file by OODoc 2.00.
 package Mail::Internet;
 use vars '$VERSION';
-$VERSION = '2.10';
+$VERSION = '2.11';
 
 use strict;
 # use warnings?  probably breaking too much code
