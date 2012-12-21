@@ -114,6 +114,10 @@ Return the address excluding the user id and '@'
 Using the information contained within the object attempt to identify what
 the person or groups name is.
 
+B<Note:> This function tries to be smart with the "phrase" of the
+email address, which is probably a very bad idea.  Consider to use
+L<phrase()|Mail::Address/"Accessors"> itself.
+
 =item $obj-E<gt>B<user>()
 
 Return the address excluding the '@' and the mail domain

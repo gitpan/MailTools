@@ -52,7 +52,7 @@ pairs, just like a hash table. Valid options are
  -Option    --Default
   FoldLength  79
   MailFrom    'KEEP'
-  Modify      true
+  Modify      false
 
 =over 2
 
