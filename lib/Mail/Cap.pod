@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Cap - Parse mailcap files
@@ -71,7 +73,7 @@ example:
 
 =head2 Run commands
 
-These methods invoke a suitable progam presenting or manipulating the
+These methods invoke a suitable program presenting or manipulating the
 media object in the specified file.  They all return C<1> if a command
 was found, and C<0> otherwise.  You might test C<$?> for the outcome
 of the command.
@@ -91,7 +93,7 @@ of the command.
 =head2 Command creator
 
 These methods return a string that is suitable for feeding to system()
-in order to invoke a suitable progam presenting or manipulating the
+in order to invoke a suitable program presenting or manipulating the
 media object in the specified file.  It will return C<undef> if no
 suitable specification exists.
 
@@ -118,7 +120,7 @@ Methods return the corresponding mailcap field for the type.
 =item $obj-E<gt>B<field>(TYPE, FIELD)
 
 Returns the specified field for the type.  Returns undef if no
-specification exsists.
+specification exists.
 
 =item $obj-E<gt>B<nametemplate>(TYPE)
 

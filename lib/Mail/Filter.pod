@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Filter - Filter mail through multiple subroutines
@@ -50,7 +52,7 @@ on the <Mail::Filter> object.
 
 =item $obj-E<gt>B<add>(FILTER [, FILTER ...])
 
-Add the given filters to the end of the fliter list.
+Add the given filters to the end of the filter list.
 
 =back
 

@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Address - Parse mail addresses
@@ -31,7 +33,7 @@ separator between addresses;
 
 =item *
 
-limitted support for escapes in phrases and comments.  There are
+limited support for escapes in phrases and comments.  There are
 cases where it can get wrong; and
 
 =item *

@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Internet - manipulate email messages
@@ -225,7 +227,7 @@ white spaces.
 
 It can cause problems with some applications if a message contains a line
 starting with C<`From '>, in particular when attempting to split a folder.
-This method inserts a leading C<`>'> on anyline that matches the regular
+This method inserts a leading C<`>'> on any line that matches the regular
 expression C</^>*From/>
 
 =item $obj-E<gt>B<nntppost>([OPTIONS])

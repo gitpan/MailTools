@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Field::Date - a date header field
@@ -16,10 +18,16 @@ Mail::Field::Date - a date header field
 
 Represents one "Date" header field.
 
+See L<documentation in the base class|Mail::Field/"DESCRIPTION">.
+ 
 =head1 METHODS
 
+See L<documentation in the base class|Mail::Field/"METHODS">.
+ 
 =head2 Constructors
 
+See L<documentation in the base class|Mail::Field/"Constructors">.
+ 
 =over 4
 
 =item Mail::Field::Date-E<gt>B<combine>(FIELDS)
@@ -38,6 +46,8 @@ See L<Mail::Field/"Constructors">
 
 =head2 "Fake" constructors
 
+See L<documentation in the base class|Mail::Field/""Fake" constructors">.
+ 
 =over 4
 
 =item $obj-E<gt>B<create>(OPTIONS)
@@ -52,6 +62,8 @@ See L<Mail::Field/""Fake" constructors">
 
 =head2 Accessors
 
+See L<documentation in the base class|Mail::Field/"Accessors">.
+ 
 =over 4
 
 =item $obj-E<gt>B<set>(OPTIONS)
@@ -84,6 +96,8 @@ See L<Mail::Field/"Accessors">
 
 =head2 Smart accessors
 
+See L<documentation in the base class|Mail::Field/"Smart accessors">.
+ 
 =over 4
 
 =item $obj-E<gt>B<text>([STRING])
@@ -96,6 +110,10 @@ Query (or change) the TIME (as stored in the field) in seconds.
 
 =back
 
+=head1 DETAILS
+
+See L<documentation in the base class|Mail::Field/"DETAILS">.
+ 
 =head1 DIAGNOSTICS
 
 =over 4
@@ -103,7 +121,7 @@ Query (or change) the TIME (as stored in the field) in seconds.
 =item Error: Undefined subroutine <method> called
 
 Mail::Field objects use autoloading to compile new functionality.
-Apparently, the mehod called is not implemented for the specific
+Apparently, the method called is not implemented for the specific
 class of the field object.
 
 =back

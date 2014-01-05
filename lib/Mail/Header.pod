@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Header - manipulate MIME headers
@@ -153,7 +155,7 @@ starts with the tags given.
 
 =item $obj-E<gt>B<add>(TAG, LINE [, INDEX])
 
-Add a new line to the header. If TAG is C<undef> the the tag will be
+Add a new line to the header. If TAG is C<undef> the tag will be
 extracted from the beginning of the given line. If INDEX is given,
 the new line will be inserted into the header at the given point, otherwise
 the new line will be appended to the end of the header.
@@ -205,7 +207,7 @@ file descriptor is given.
 
 =item $obj-E<gt>B<replace>(TAG, LINE [, INDEX ])
 
-Replace a line in the header.  If TAG is C<undef> the the tag will be
+Replace a line in the header.  If TAG is C<undef> the tag will be
 extracted from the beginning of the given line. If INDEX is given
 the new line will replace the Nth instance of that tag, otherwise the
 first instance of the tag is replaced. If the tag does not appear in the

@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 NAME
 
 Mail::Field::AddrList - object representation of e-mail address lists
@@ -35,13 +37,19 @@ fields: C<To>, C<From>, C<Cc>, C<Reply-To>, and C<Sender>.
 
 All the normally used features of the address field specification of
 RFC2822 are implemented, but some complex (and therefore hardly ever used)
-constructs will not be inderstood.  Use Mail::Message::Field::Full
+constructs will not be understood.  Use Mail::Message::Field::Full
 in MailBox if you need full RFC compliance.
 
+See L<documentation in the base class|Mail::Field/"DESCRIPTION">.
+ 
 =head1 METHODS
 
+See L<documentation in the base class|Mail::Field/"METHODS">.
+ 
 =head2 Constructors
 
+See L<documentation in the base class|Mail::Field/"Constructors">.
+ 
 =over 4
 
 =item Mail::Field::AddrList-E<gt>B<combine>(FIELDS)
@@ -60,6 +68,8 @@ See L<Mail::Field/"Constructors">
 
 =head2 "Fake" constructors
 
+See L<documentation in the base class|Mail::Field/""Fake" constructors">.
+ 
 =over 4
 
 =item $obj-E<gt>B<create>(OPTIONS)
@@ -74,6 +84,8 @@ See L<Mail::Field/""Fake" constructors">
 
 =head2 Accessors
 
+See L<documentation in the base class|Mail::Field/"Accessors">.
+ 
 =over 4
 
 =item $obj-E<gt>B<set>(OPTIONS)
@@ -94,6 +106,8 @@ See L<Mail::Field/"Accessors">
 
 =head2 Smart accessors
 
+See L<documentation in the base class|Mail::Field/"Smart accessors">.
+ 
 =over 4
 
 =item $obj-E<gt>B<addr_list>()
@@ -119,6 +133,10 @@ See L<Mail::Field/"Smart accessors">
 
 =back
 
+=head1 DETAILS
+
+See L<documentation in the base class|Mail::Field/"DETAILS">.
+ 
 =head1 DIAGNOSTICS
 
 =over 4
@@ -126,7 +144,7 @@ See L<Mail::Field/"Smart accessors">
 =item Error: Undefined subroutine <method> called
 
 Mail::Field objects use autoloading to compile new functionality.
-Apparently, the mehod called is not implemented for the specific
+Apparently, the method called is not implemented for the specific
 class of the field object.
 
 =back
