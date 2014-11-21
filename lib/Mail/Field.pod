@@ -45,7 +45,7 @@ new objects. These can all be categorized as constructor.
 Take a LIST of C<Mail::Field> objects (which should all be of the same
 sub-class) and create a new object in that same class.
 
-=item Mail::Field-E<gt>B<extract>(TAG, HEAD [, INDEX ])
+=item Mail::Field-E<gt>B<extract>( TAG, HEAD [, INDEX ] )
 
 Takes as arguments the tag name, a C<Mail::Head> object
 and optionally an index.
@@ -60,7 +60,7 @@ will be as if C<extract> was called with an index value of zero. If called
 in an array context then all tags will be retrieved and a list of
 C<Mail::Field> objects will be returned.
 
-=item Mail::Field-E<gt>B<new>(TAG [, STRING | OPTIONS])
+=item Mail::Field-E<gt>B<new>( TAG [, STRING | OPTIONS] )
 
 Create an object in the class which defines the field specified by
 the TAG argument.
@@ -109,7 +109,7 @@ people have some preferences.
 
 =over 4
 
-=item $obj-E<gt>B<text>([STRING])
+=item $obj-E<gt>B<text>( [STRING] )
 
 Without arguments, the field is returned as L<stringify()|Mail::Field/"Accessors"> does.  Otherwise,
 the STRING is parsed with L<parse()|Mail::Field/""Fake" constructors"> to replace the object's content.

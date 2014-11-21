@@ -23,7 +23,7 @@ the calling package.
 
 =over 4
 
-=item B<mailaddress>([ADDRESS])
+=item B<mailaddress>( [ADDRESS] )
 
 Return a guess at the current users mail address. The user can force
 the return value by setting the MAILADDRESS environment variable.

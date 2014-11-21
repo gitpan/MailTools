@@ -55,7 +55,7 @@ part of MailBox.
 
 =over 4
 
-=item Mail::Address-E<gt>B<new>(PHRASE, ADDRESS, [ COMMENT ])
+=item Mail::Address-E<gt>B<new>( PHRASE, ADDRESS, [ COMMENT ] )
 
 Create a new C<Mail::Address> object which represents an address with the
 elements given. In a message these 3 elements would be seen like:
@@ -90,7 +90,7 @@ Return the address part of the object.
 
 Return the comment part of the object
 
-=item $obj-E<gt>B<format>([ADDRESSes])
+=item $obj-E<gt>B<format>( [ADDRESSes] )
 
 Return a string representing the address in a suitable form to be placed
 on a C<To>, C<Cc>, or C<Bcc> line of a message.  This method is called on

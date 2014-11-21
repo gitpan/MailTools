@@ -18,51 +18,51 @@ Mail::Field::Date - a date header field
 
 Represents one "Date" header field.
 
-See L<documentation in the base class|Mail::Field/"DESCRIPTION">.
+Extends L<"DESCRIPTION" in Mail::Field|Mail::Field/"DESCRIPTION">.
  
 =head1 METHODS
 
-See L<documentation in the base class|Mail::Field/"METHODS">.
+Extends L<"METHODS" in Mail::Field|Mail::Field/"METHODS">.
  
 =head2 Constructors
 
-See L<documentation in the base class|Mail::Field/"Constructors">.
+Extends L<"Constructors" in Mail::Field|Mail::Field/"Constructors">.
  
 =over 4
 
 =item Mail::Field::Date-E<gt>B<combine>(FIELDS)
 
-See L<Mail::Field/"Constructors">
+Inherited, see L<Mail::Field/"Constructors">
 
-=item Mail::Field::Date-E<gt>B<extract>(TAG, HEAD [, INDEX ])
+=item Mail::Field::Date-E<gt>B<extract>( TAG, HEAD [, INDEX ] )
 
-See L<Mail::Field/"Constructors">
+Inherited, see L<Mail::Field/"Constructors">
 
-=item Mail::Field::Date-E<gt>B<new>(TAG [, STRING | OPTIONS])
+=item Mail::Field::Date-E<gt>B<new>( TAG [, STRING | OPTIONS] )
 
-See L<Mail::Field/"Constructors">
+Inherited, see L<Mail::Field/"Constructors">
 
 =back
 
 =head2 "Fake" constructors
 
-See L<documentation in the base class|Mail::Field/""Fake" constructors">.
+Extends L<""Fake" constructors" in Mail::Field|Mail::Field/""Fake" constructors">.
  
 =over 4
 
 =item $obj-E<gt>B<create>(OPTIONS)
 
-See L<Mail::Field/""Fake" constructors">
+Inherited, see L<Mail::Field/""Fake" constructors">
 
 =item $obj-E<gt>B<parse>()
 
-See L<Mail::Field/""Fake" constructors">
+Inherited, see L<Mail::Field/""Fake" constructors">
 
 =back
 
 =head2 Accessors
 
-See L<documentation in the base class|Mail::Field/"Accessors">.
+Extends L<"Accessors" in Mail::Field|Mail::Field/"Accessors">.
  
 =over 4
 
@@ -84,27 +84,27 @@ A string acceptable to Date::Parse.
 
 =item $obj-E<gt>B<stringify>()
 
-See L<Mail::Field/"Accessors">
+Inherited, see L<Mail::Field/"Accessors">
 
 =item $obj-E<gt>B<tag>()
 
 =item Mail::Field::Date-E<gt>B<tag>()
 
-See L<Mail::Field/"Accessors">
+Inherited, see L<Mail::Field/"Accessors">
 
 =back
 
 =head2 Smart accessors
 
-See L<documentation in the base class|Mail::Field/"Smart accessors">.
+Extends L<"Smart accessors" in Mail::Field|Mail::Field/"Smart accessors">.
  
 =over 4
 
-=item $obj-E<gt>B<text>([STRING])
+=item $obj-E<gt>B<text>( [STRING] )
 
-See L<Mail::Field/"Smart accessors">
+Inherited, see L<Mail::Field/"Smart accessors">
 
-=item $obj-E<gt>B<time>([TIME])
+=item $obj-E<gt>B<time>( [TIME] )
 
 Query (or change) the TIME (as stored in the field) in seconds.
 
@@ -112,7 +112,7 @@ Query (or change) the TIME (as stored in the field) in seconds.
 
 =head1 DETAILS
 
-See L<documentation in the base class|Mail::Field/"DETAILS">.
+Extends L<"DETAILS" in Mail::Field|Mail::Field/"DETAILS">.
  
 =head1 DIAGNOSTICS
 
